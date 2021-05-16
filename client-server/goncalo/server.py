@@ -92,8 +92,13 @@ def quit_client (client_sock, request):
 # Suporte da criação de um ficheiro csv com o respectivo cabeçalho
 #
 def create_file ():
+	# create report csv file with header
+	file = open('report.csv', 'w')
+	writer = csv.DictWriter(file, delimiter=',', fieldnames=['client_id', 'secret_number', 'max_plays', 'current_plays', 'result'])
+	writer.writeheader()
+
+	file.close()
 	return None
-# create report csv file with header
 
 
 #
@@ -126,15 +131,25 @@ def stop_client (client_sock, request):
 # return response message with result or error message
 
 
-def main():
+def main(argv):
 	# validate the number of arguments and eventually print error message and exit with error
 	# verify type of of arguments and eventually print error message and exit with error
+	assert len(argv) > 1, "Porto de acesso precisa de ser especificado"
+	assert int(argv[1]) > 0, "Valor do porto tem de ser superior a 0"
 	
-	port = ?
+	port = int(argv[1])
 
 	server_socket = socket.socket (socket.AF_INET, socket.SOCK_STREAM)
-	server_socket.bind (("127.0.0.1", port))
-	server_socket.listen (10)
+	try:
+		server_socket.bind (("127.0.0.1", port))
+		server_socket.listen (10)
+	except PermissionError:
+		print("ERRO : Acesso negado com a porta de acesso fornecida")
+		exit(1)
+	except OSError:
+		print("ERRO : O servidor já está a correr")
+		exit(2)
+
 
 	clients = []
 	create_file ()
@@ -167,4 +182,4 @@ def main():
 					break # Reiterate select
 
 if __name__ == "__main__":
-	main()
+	main(sys.argv)

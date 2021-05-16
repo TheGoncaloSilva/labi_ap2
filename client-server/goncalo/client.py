@@ -51,15 +51,29 @@ def run_client (client_sock, client_id):
 	return None
 	
 
-def main():
+def main(argv):
 	# validate the number of arguments and eventually print error message and exit with error
 	# verify type of of arguments and eventually print error message and exit with error
+	assert len(argv) > 2, "Argumentos necessários tipo: <client_id> <porto> <máquina>"
+	assert int(argv[1]) > 0, "Client_id tem de ser positivo"
+	assert int(argv[2]) > 0, "Porto TCP do servidor tem de ser positivo"
 
-	port = ?
-	hostname = ?
+	ip = "127.0.0.1"
+	if(len(argv) == 3) :
+		ip = argv[3]
+
+	port = int(argv[2])
+	hostname = ip
 
 	client_sock = socket.socket (socket.AF_INET, socket.SOCK_STREAM)
-	client_sock.connect ((hostname, port))
+	try :
+		client_sock.connect ((hostname, port))
+	except PermissionError:
+		print("ERRO : Acesso negado ao conectar com o servidor")
+		exit(1)
+	except OSError:
+		print("ERRO : Não foi possível encontrar o servidor")
+		exit(2)
 
 	run_client (client_sock, sys.argv[1])
 
@@ -67,4 +81,4 @@ def main():
 	sys.exit (0)
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv)
