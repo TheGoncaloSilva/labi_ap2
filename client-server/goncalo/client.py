@@ -48,6 +48,9 @@ def quit_action (client_sock, attempts):
 # Suporte da execução do cliente
 #
 def run_client (client_sock, client_id):
+	request = { 'op': 'START', client_id: 'cipher' }
+	send_dict (client_sock, request)
+	# print(request) Debug
 	return None
 	
 
@@ -59,13 +62,14 @@ def main(argv):
 	assert int(argv[2]) > 0, "Porto TCP do servidor tem de ser positivo"
 
 	ip = "127.0.0.1"
-	if(len(argv) == 3) :
+	if(len(argv) == 4) :
 		ip = argv[3]
 
 	port = int(argv[2])
 	hostname = ip
 
 	client_sock = socket.socket (socket.AF_INET, socket.SOCK_STREAM)
+	client_sock.bind ((ip, 0))
 	try :
 		client_sock.connect ((hostname, port))
 	except PermissionError:

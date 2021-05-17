@@ -141,6 +141,7 @@ def main(argv):
 
 	server_socket = socket.socket (socket.AF_INET, socket.SOCK_STREAM)
 	try:
+		#server_socket.bind((socket.gethostname(), port)) alternative to use localhost
 		server_socket.bind (("127.0.0.1", port))
 		server_socket.listen (10)
 	except PermissionError:
