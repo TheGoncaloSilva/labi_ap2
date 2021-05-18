@@ -54,9 +54,9 @@ def run_client (client_sock, client_id):
 def main():
 	# validate the number of arguments and eventually print error message and exit with error
 	# verify type of of arguments and eventually print error message and exit with error
-
+    #127.0.0.1
 	port = ?
-	hostname = ?
+	hostname = "127.0.0.1"
 
 	client_sock = socket.socket (socket.AF_INET, socket.SOCK_STREAM)
 	client_sock.connect ((hostname, port))
