@@ -58,21 +58,32 @@ def main():
 		print("python3 client.py client_id porto [máquina]")
 		sys.exit
 	# verify type of of arguments and eventually print error message and exit with error
-	for i in len(sys.argv) - 1:
-         if i == 2:
-			 if any(char.isletter() for char in sys.argv[i]):
-				 print("Porta inválida! Deve conter apenas números")
-				 sys.exit
-			 elif sys.argv[i] > 65535 or sys.argv[i] < 0:
-				 print("Porta inválida! Deve escrever um número entre 0 e 65535")
-				 sys.exit				 
-		 elif i == 1:
-			 if any(char.isdigit() for char in start["client_id"]) or len(start["client_id"]) <= 0:
-		         print("ID de client inválido!")
+    
+	#Verifica a validade do id do cliente
+	if any(char.isdigit() for char in sys.argv[1]) or len(sys.argv[1]) <= 0:
+		print("ID de client inválido!")
+		sys.exit
+    
+	#Verifica a validade da porta
+	for i in range(0, len(sys.argv[2]) - 1):
+		if sys.argv[2][i].isalpha:
+			print("Porta inválida! A porta não deve conter letras")
+			sys.exit
+    
+	if sys.argv[2] > 65535 or sys.argv[2] < 0:
+		print("Porta inválida! Deve escrever um número entre 0 e 65535")
+		sys.exit
+    
+	#Verifica a validade da máquina
+	host = sys.argv[3].split('.')
+	for i in range(0, len(host) - 1):
+         if host[i] < 0 or host[i] > 255:
+            print("Erro! A máquina é identificada da seguinte maneira:")
+			print("X.X.X.X ,sendo X um número entre 0 e 255")
+			sys.exit
 
     #127.0.0.1
-
-	port = sys.argv[2]
+    port = sys.argv[2]
 
 	hostname = sys.argv[3]
     
