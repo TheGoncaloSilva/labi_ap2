@@ -53,13 +53,47 @@ def run_client (client_sock, client_id):
 
 def main():
 	# validate the number of arguments and eventually print error message and exit with error
+	if len(sys.argv) != 4:
+		print("Argumentos inválidos, deve ter o formato:")
+		print("python3 client.py client_id porto [máquina]")
+		sys.exit
 	# verify type of of arguments and eventually print error message and exit with error
-    #127.0.0.1
-	port = ?
-	hostname = "127.0.0.1"
+	for i in len(sys.argv) - 1:
+         if i == 2:
+			 if any(char.isletter() for char in sys.argv[i]):
+				 print("Porta inválida! Deve conter apenas números")
+				 sys.exit
+			 elif sys.argv[i] > 65535 or sys.argv[i] < 0:
+				 print("Porta inválida! Deve escrever um número entre 0 e 65535")
+				 sys.exit				 
+		 elif i == 1:
+			 if any(char.isdigit() for char in start["client_id"]) or len(start["client_id"]) <= 0:
+		         print("ID de client inválido!")
 
+    #127.0.0.1
+
+	port = sys.argv[2]
+
+	hostname = sys.argv[3]
+    
+	#Socket
 	client_sock = socket.socket (socket.AF_INET, socket.SOCK_STREAM)
+
+	#Ligar ao servidor
 	client_sock.connect ((hostname, port))
+
+	start = { "op": "START"}
+	start["client_id"] = input("Nome: ")
+
+	#
+	if any(char.isdigit() for char in start["client_id"]) or len(start["client_id"]) <= 0:
+		print("ID de client inválido!")
+	else:
+	    
+        x = client_sock.sendrecv_dict(hostname, start)
+	    if x = None:
+	        print("Erro")
+	  
 
 	run_client (client_sock, sys.argv[1])
 
