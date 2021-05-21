@@ -7,6 +7,8 @@ import json
 import base64
 import csv
 import random
+
+from Crypto import Cipher
 from common_comm import send_dict, recv_dict, sendrecv_dict
 
 from Crypto.Cipher import AES
@@ -49,6 +51,11 @@ def decrypt_intvalue (client_id, data):
 # Suporte de descodificação da operação pretendida pelo cliente
 #
 def new_msg (client_sock):
+	request = recv_dict (client_sock)
+	#data = base64.b64decode (request['value'])
+	#data = cipher.decrypt (data)
+	if(int(request['client_id'])) :
+		new_client(client_sock, request)
 	return None
 # read the client request
 # detect the operation requested by the client
@@ -60,6 +67,7 @@ def new_msg (client_sock):
 # Suporte da criação de um novo jogador - operação START
 #
 def new_client (client_sock, request):
+	# obter o request e verificar guardar um novo registo no dicionário gamers
 	return None
 # detect the client in the request
 # verify the appropriate conditions for executing this operation
@@ -134,8 +142,12 @@ def stop_client (client_sock, request):
 def main(argv):
 	# validate the number of arguments and eventually print error message and exit with error
 	# verify type of of arguments and eventually print error message and exit with error
-	assert len(argv) > 1, "Porto de acesso precisa de ser especificado"
-	assert int(argv[1]) > 0, "Valor do porto tem de ser superior a 0"
+	if(len(argv) <= 1) :
+		print("Porto de acesso precisa de ser especificado")
+		exit(1)
+	if(int(argv[1]) <= 0) :
+		print("Valor do porto tem de ser superior a 0")
+		exit(2)
 	
 	port = int(argv[1])
 
