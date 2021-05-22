@@ -14,7 +14,9 @@ def main ():
 
 	# aceitar novos clientes
 	client_s, client_addr = tcp_s.accept ()
-	
+	print("Nova entrada")
+	print(client_s)
+	print(client_addr)
 	request = recv_dict (client_s)
 	cipherkey = base64.b64decode (request['cipher'])
 	cipher = AES.new (cipherkey, AES.MODE_ECB)
