@@ -1,6 +1,5 @@
 #!/usr/bin/python3
 
-from os import name
 import sys
 import socket
 import select
@@ -25,6 +24,9 @@ gamers = {}
 
 # return the client_id of a socket or None
 def find_client_id (client_sock):
+	for val in gamers:	# val tem o client_id de cada registo
+		if client_sock.getpeername()[1] is gamers[val][0]['socket'].getpeername()[1]: # check address of each entry
+   			return val # client_id found
 	return None
 
 
@@ -109,10 +111,9 @@ def new_client (client_sock, request):
 # Procurar no dicionário gamers
 #
 def search_gamers(value):
-	for val in gamers:	
-		if value == val['client_id']: # Check each line
-   			return val['client_id'] # Item found
-			   #... continue
+	for val in gamers:
+		if value == gamers[val]: # Check each line 
+   			return val # client_found
 
 
 #
