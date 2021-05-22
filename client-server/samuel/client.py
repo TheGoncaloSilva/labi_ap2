@@ -24,15 +24,23 @@ def decrypt_intvalue(cipherkey, data):
 
 
 # verify if response from server is valid or is an error message and act accordingly
+# If true there's an error
 def validate_response(client_sock, response):
     if "error" in response:
         print(response['error'])
-    return None
+        return True
+    else: 
+        return False
 
 
 # process QUIT operation
 def quit_action(client_sock, attempts):
-    return None
+    quit = {"op": "QUIT"}
+    recvquit = sendrecv_dict(client_sock, quit)
+    if validate_response: return recvquit['error']
+    else:
+        print(f"Desistiu do jogo depois de {attempts}")
+        return None
 
 
 # Outcomming message structure:
@@ -66,17 +74,16 @@ def run_client(client_sock, client_id):
         print("Adivinhar - 1")
         print("Terminar o jogo - 2")
         print("Desistir - 3")
-
+        
+        #Operação Guess
         option = int(input(" "))
         if option == 1:
             num = int(input("Adivinhe o número secreto:"))
             guess = {'op': "GUESS", 'number': num}
             recvguess = sendrecv_dict(client_sock, guess)
             tries += 1
-            if "error" in recvguess:
-                print(recvguess['error'])
-                break
-            if recvguess['result'] == "equals" and tries <= recvguess['max_attempts']:
+            if validate_response: break
+            if recvguess['result'] == "equals" and tries <= recvstart['max_attempts']:
                 print("SUCESS")
             elif recvguess['result'] == "smaller":
                 print("O número secreto é menor do que o inserido")
@@ -84,27 +91,22 @@ def run_client(client_sock, client_id):
                 print("O número secreto é maior do que o inserido")
             else:
                 print("FAILURE")
-
+        
+        #Operação Stop
         elif option == 2:
             stop = {"op": "STOP", "number": recvguess['number'], "attempts": tries}
             recvstop = sendrecv_dict(client_sock, stop)
-            if "error" in recvstop:
-                print(recvstop['error'])
-            if stop[num] == recvstop[guess] and tries <= 30:
+            if validate_response: break
+            if stop['number'] == recvstop['guess'] and tries <= recvstart['max_attempts']:
                 print(f"O número era {recvstop[guess]}!")
                 print("SUCESS")
             else:
-                print
+                 print(f"O número era {recvstop[guess]}!")
+                 print("SUCESS")
                 
-
+        #Operação Quit
         elif option == 3:
-            quit = {"op": "QUIT"}
-            recvquit = sendrecv_dict(client_sock, quit)
-            if "error" in recvquit:
-                print(recvquit['error'])
-            else:
-                print("Desistiu do jogo")
-            break
+            quit_action(client_sock, tries)
 
     return None
 
