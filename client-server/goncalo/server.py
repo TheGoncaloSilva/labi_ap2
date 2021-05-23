@@ -33,13 +33,19 @@ def find_client_id (client_sock):
 # Função para encriptar valores a enviar em formato json com codificação base64
 # return int data encrypted in a 16 bytes binary string and coded base64
 def encrypt_intvalue (client_id, data):
-	return None
+
+	cipher = AES.new (gamers[client_id][0]['cipher'], AES.MODE_ECB) # Definir o algoritmo de encriptação tendo em conta a chave fornecida
+	data = cipher.encrypt (bytes("%16d" % (data), 'utf8'))
+	return str (base64.b64encode (data), 'utf8')
+	
 
 
 # Função para desencriptar valores recebidos em formato json com codificação base64
 # return int data decrypted from a 16 bytes binary string and coded base64
 def decrypt_intvalue (client_id, data):
-	return None
+	cipher = AES.new (gamers[client_id][0]['cipher'], AES.MODE_ECB) # Definir o algoritmo de encriptação tendo em conta a chave fornecida
+	data = base64.b64decode (data)
+	return cipher.decrypt (data)
 
 
 #
@@ -101,6 +107,11 @@ def new_client (client_sock, request):
 
 	gamers.update({request['client_id'] : [{ 'socket': client_sock, 'cipher' : request['cipher'],
 			'guess' : secret_number, 'max_attempts' : max_Plays, 'attempts' : 0 }]})
+	try :
+		if(request['cipher'] != None) : # Se o cliente escolheu comunicar por encriptação
+			max_Plays = encrypt_intvalue(request['client_id'], max_Plays) # encriptar o número de jogadas
+	except : # se o campo cipher não existir, quer dizer que o utilizador não escolheu encriptar a ligação
+		pass # continuar o program e enviar os dados como estavam
 
 	return { 'op': 'START', 'status': 'True', 'max_attempts' : max_Plays }
 # detect the client in the request
