@@ -16,9 +16,9 @@ from Crypto.Cipher import AES
 # Dicionário com a informação relativa aos clientes
 # Exemplo do formato
 # gammers = {
-#			 ’manel’: { ’socket’: <socket ... raddr=(’127.0.0.1’, 46196)>,
-#						’cipher’: b’)6\x0c\xba\xf8\x14\xa7iU\xac\x8a~\xe0H~0’,
-#						’guess’: 36, ’max_attempts’: 22, ’attempts’: 0 }
+#			 ’manel’: { 'socket': <socket ... raddr=('127.0.0.1', 46196)>,
+#						'cipher': b')6\x0c\xba\xf8\x14\xa7iU\xac\x8a~\xe0H~0',
+#						'guess': 36, 'max_attempts': 22, 'attempts': 0 }
 # }
 gamers = {}
 
@@ -69,14 +69,16 @@ def new_msg (client_sock):
 	if (op is 'START') :
 		response = new_client(client_sock, request)
 	elif (op is 'QUIT') :
-		response = quit_client(client_sock, request) # Todo
+		response = quit_client(client_sock, request)
 	elif (op is 'GUESS') :
-		response = guess_client(client_sock, request) # Todo
+		response = guess_client(client_sock, request)
 	elif (op is 'STOP') :
 		response = stop_client(client_sock, request) # Todo
 	else :
 		response = { 'op': 'QUIT', 'status': False, 'error' : 'um dos erros indicados em cima' }
 
+	#data = cipher.encrypt (bytes("%16d" % (data), 'utf8'))
+	#data_tosend = str (base64.b64encode (data), 'utf8')
 	result = send_dict (client_sock, response)
 	return response
 # read the client request
@@ -128,7 +130,17 @@ def clean_client (client_sock):
 # Suporte do pedido de desistência de um cliente - operação QUIT
 #
 def quit_client (client_sock, request):
-	return None
+	client_id = find_client_id(client_sock) # Id do cliente devolvido pela função
+	if (client_id == None):
+  		return { 'op': 'QUIT', 'status': False, 'error': 'Cliente inexistente' }
+
+	result = { 'client_id' : client_id, 'secret_number' : gamers[client_id][0]['guess'], 
+	'max_plays' : gamers[client_id][0]['max_attempts'], 'current_plays' : gamers[client_id][0]['attempts'],
+	'result' : 'QUIT'} # Dicionário para guardar no ficheiro json
+	
+	update_file(client_id, result)
+	del gamers[client_id]
+	return {'op': 'QUIT', 'status': True}
 # obtain the client_id from his socket
 # verify the appropriate conditions for executing this operation
 # process the report file with the QUIT result
@@ -146,18 +158,20 @@ def quit_client (client_sock, request):
 #
 def create_file ():
 	# create report csv file with header
-	file = open('report.csv', 'w')
+	file = open('report.csv', 'w') # abrir ou criar o ficheiro se não existir
 	writer = csv.DictWriter(file, delimiter=',', fieldnames=['client_id', 'secret_number', 'max_plays', 'current_plays', 'result'])
-	writer.writeheader()
+	writer.writeheader() # Escrever os nomes das colunas
 
 	file.close()
 	return None
-
 
 #
 # Suporte da actualização de um ficheiro csv com a informação do cliente e resultado
 #
 def update_file (client_id, result):
+	file = open('report.csv', 'w') # abrir o ficheiro
+	writer = csv.DictWriter(file, delimiter=',', fieldnames=['client_id', 'secret_number', 'max_plays', 'current_plays', 'result'])
+	writer.writerow(result)
 	return None
 # update report csv file with the result from the client
 
@@ -166,7 +180,20 @@ def update_file (client_id, result):
 # Suporte da jogada de um cliente - operação GUESS
 #
 def guess_client (client_sock, request):
-	return None
+	client_id = find_client_id(client_sock) # Id do cliente devolvido pela função
+	if (client_id == None):
+  		return { 'op': 'GUESS', 'status': False, 'error': 'Cliente inexistente' }
+	gamers[client_id][0]['attempts'] += 1 # contar uma tentativa
+	result = ''
+	if(request['number'] < gamers[client_id][0]['guess']) :
+		result = 'larger'
+	elif (request['number'] > gamers[client_id][0]['guess']) :
+		result = 'smaller'
+	else : 
+		result = 'equals'
+	# Verificar se é a última jogada ou não
+
+	return { 'op' : 'GUESS', 'status' : True, 'result' : result}
 # obtain the client_id from his socket
 # verify the appropriate conditions for executing this operation
 # return response message with result or error message
@@ -176,6 +203,9 @@ def guess_client (client_sock, request):
 # Suporte do pedido de terminação de um cliente - operação STOP
 #
 def stop_client (client_sock, request):
+	client_id = find_client_id(client_sock) # Id do cliente devolvido pela função
+	if (client_id == None):
+  		return { 'op': 'STOP', 'status': False, 'error': 'Cliente inexistente' }
 	return None
 # obtain the client_id from his socket
 # verify the appropriate conditions for executing this operation
