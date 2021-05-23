@@ -73,9 +73,9 @@ def new_msg (client_sock):
 	elif (op is 'GUESS') :
 		response = guess_client(client_sock, request)
 	elif (op is 'STOP') :
-		response = stop_client(client_sock, request) # Todo
+		response = stop_client(client_sock, request)
 	else :
-		response = { 'op': 'QUIT', 'status': False, 'error' : 'um dos erros indicados em cima' }
+		response = { 'op': request['op'], 'status': False, 'error' : 'Operação Inválida' }
 
 	#data = cipher.encrypt (bytes("%16d" % (data), 'utf8'))
 	#data_tosend = str (base64.b64encode (data), 'utf8')
@@ -139,7 +139,7 @@ def quit_client (client_sock, request):
 	'result' : 'QUIT'} # Dicionário para guardar no ficheiro json
 	
 	update_file(client_id, result)
-	del gamers[client_id]
+	del gamers[client_id] # eliminar o cliente do dicionário de jogadores ativos
 	return {'op': 'QUIT', 'status': True}
 # obtain the client_id from his socket
 # verify the appropriate conditions for executing this operation
@@ -191,7 +191,6 @@ def guess_client (client_sock, request):
 		result = 'smaller'
 	else : 
 		result = 'equals'
-	# Verificar se é a última jogada ou não
 
 	return { 'op' : 'GUESS', 'status' : True, 'result' : result}
 # obtain the client_id from his socket
@@ -206,7 +205,23 @@ def stop_client (client_sock, request):
 	client_id = find_client_id(client_sock) # Id do cliente devolvido pela função
 	if (client_id == None):
   		return { 'op': 'STOP', 'status': False, 'error': 'Cliente inexistente' }
-	return None
+
+	response = {'op' : 'QUIT', 'status' : False, 'error' : 'Número de jogadas inconsistente/ Número secreto incorreto'}
+	write = 'FAILURE'
+	if (request['attempts'] is gamers[client_id][0]['attempts']) :
+		if ((request['number'] is gamers[client_id][0]['guess']) and gamers[client_id][0]['attempts'] < gamers[client_id][0]['max_attempts']) :
+			response = {'op' : 'STOP', 'status' : True, 'guess' : gamers[client_id][0]['guess']}
+			write = 'SUCCESS'
+
+	result = { 'client_id' : client_id, 'secret_number' : gamers[client_id][0]['guess'], 
+	'max_plays' : gamers[client_id][0]['max_attempts'], 'current_plays' : gamers[client_id][0]['attempts'],
+	'result' : write} # Dicionário para guardar no ficheiro json
+			
+	update_file(client_id, result)
+	del gamers[client_id] # eliminar o cliente do dicionário de jogadores ativos
+
+	return response
+
 # obtain the client_id from his socket
 # verify the appropriate conditions for executing this operation
 # process the report file with the SUCCESS/FAILURE result
