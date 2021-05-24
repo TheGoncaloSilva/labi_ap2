@@ -45,7 +45,7 @@ def encrypt_intvalue (client_id, data):
 def decrypt_intvalue (client_id, data):
 	cipher = AES.new (gamers[client_id][0]['cipher'], AES.MODE_ECB) # Definir o algoritmo de encriptação tendo em conta a chave fornecida
 	data = base64.b64decode (data)
-	return cipher.decrypt (data)
+	return int (str (cipher.decrypt (data)))
 
 
 #
@@ -70,22 +70,25 @@ def new_msg (client_sock):
 	request = recv_dict (client_sock)
 	#data = base64.b64decode (request['value'])
 	#data = cipher.decrypt (data)
-	op = request['op'].upper() # Operação escolhida pelo cliente (name.upper para não haver problemas com letras minúsculas e maiúsculas)
-	cipher = request['cipher'] # cifra escolhida pelo utilizador
-	if (op is 'START') :
+	try : # se um cliente aceder sem o formato correto
+		op = request['op'].upper() # Operação escolhida pelo cliente (name.upper para não haver problemas com letras minúsculas e maiúsculas)
+	except :
+		return None
+	#cipher = request['cipher'] -> cifra escolhida pelo utilizador
+	if (op == 'START') :
 		response = new_client(client_sock, request)
-	elif (op is 'QUIT') :
+	elif (op == 'QUIT') :
 		response = quit_client(client_sock, request)
-	elif (op is 'GUESS') :
+	elif (op == 'GUESS') :
 		response = guess_client(client_sock, request)
-	elif (op is 'STOP') :
+	elif (op == 'STOP') :
 		response = stop_client(client_sock, request)
 	else :
 		response = { 'op': request['op'], 'status': False, 'error' : 'Operação Inválida' }
 
 	#data = cipher.encrypt (bytes("%16d" % (data), 'utf8'))
 	#data_tosend = str (base64.b64encode (data), 'utf8')
-	result = send_dict (client_sock, response)
+	#result = send_dict (client_sock, response)
 	return response
 # read the client request
 # detect the operation requested by the client
@@ -99,19 +102,26 @@ def new_msg (client_sock):
 def new_client (client_sock, request):
 	# obter o request e verificar guardar um novo registo no dicionário gamers
 	# Check the return value and print message
+	try :
+		request['client_id']
+	except :
+		return { 'op': 'START', 'status': False, 'error': 'Condições inválidas' }
+
 	if (search_gamers(request['client_id']) != None):
   		return { 'op': 'START', 'status': False, 'error': 'Cliente existente' }
 
 	secret_number = random.randint(0, 100) # Gera o número secreto
 	max_Plays = random.randint(10, 30) # Gera o número máximo de tentativas
-
-	gamers.update({request['client_id'] : [{ 'socket': client_sock, 'cipher' : request['cipher'],
-			'guess' : secret_number, 'max_attempts' : max_Plays, 'attempts' : 0 }]})
 	try :
-		if(request['cipher'] != None) : # Se o cliente escolheu comunicar por encriptação
-			max_Plays = encrypt_intvalue(request['client_id'], max_Plays) # encriptar o número de jogadas
+		cipherkey = base64.b64decode (request['cipher']) # Decode cypherkey
 	except : # se o campo cipher não existir, quer dizer que o utilizador não escolheu encriptar a ligação
-		pass # continuar o program e enviar os dados como estavam
+		cipherkey = None
+
+	gamers.update({request['client_id'] : [{ 'socket': client_sock, 'cipher' : cipherkey,
+			'guess' : secret_number, 'max_attempts' : max_Plays, 'attempts' : 0 }]})
+
+	if(cipherkey != None) : # Se o cliente escolheu comunicar por encriptação
+		max_Plays = encrypt_intvalue(request['client_id'], max_Plays) # encriptar o número de jogadas
 
 	return { 'op': 'START', 'status': 'True', 'max_attempts' : max_Plays }
 # detect the client in the request
@@ -179,7 +189,7 @@ def create_file ():
 #
 # Suporte da actualização de um ficheiro csv com a informação do cliente e resultado
 #
-def update_file (client_id, result):
+def update_file (client_id, result): # client_id é redudante
 	file = open('report.csv', 'w') # abrir o ficheiro
 	writer = csv.DictWriter(file, delimiter=',', fieldnames=['client_id', 'secret_number', 'max_plays', 'current_plays', 'result'])
 	writer.writerow(result)
@@ -192,6 +202,11 @@ def update_file (client_id, result):
 #
 def guess_client (client_sock, request):
 	client_id = find_client_id(client_sock) # Id do cliente devolvido pela função
+	try :
+		request['number']
+	except : # Se o campo number não existir no dicionário enviado
+		return { 'op': 'GUESS', 'status': False, 'error': 'Condições inválidas' }
+
 	if (client_id == None):
   		return { 'op': 'GUESS', 'status': False, 'error': 'Cliente inexistente' }
 	gamers[client_id][0]['attempts'] += 1 # contar uma tentativa
@@ -214,12 +229,19 @@ def guess_client (client_sock, request):
 #
 def stop_client (client_sock, request):
 	client_id = find_client_id(client_sock) # Id do cliente devolvido pela função
+
+	try :
+		request['attempts']
+		request['number']
+	except : # Se o campo number e attempts não existir no dicionário enviado
+		return { 'op': 'GUESS', 'status': False, 'error': 'Condições inválidas' }
+
 	if (client_id == None):
   		return { 'op': 'STOP', 'status': False, 'error': 'Cliente inexistente' }
 
 	response = {'op' : 'QUIT', 'status' : False, 'error' : 'Número de jogadas inconsistente/ Número secreto incorreto'}
 	write = 'FAILURE'
-	if (request['attempts'] is gamers[client_id][0]['attempts']) :
+	if (request['attempts'] == gamers[client_id][0]['attempts']) :
 		if ((request['number'] is gamers[client_id][0]['guess']) and gamers[client_id][0]['attempts'] < gamers[client_id][0]['max_attempts']) :
 			response = {'op' : 'STOP', 'status' : True, 'guess' : gamers[client_id][0]['guess']}
 			write = 'SUCCESS'
