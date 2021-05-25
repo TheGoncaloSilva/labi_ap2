@@ -83,7 +83,9 @@ def run_client(client_sock, client_id):
         print("Desistir - 3")
         
         #Operação Guess
-        option = int(input(" "))
+        try: 
+            option = int(input(" "))
+        except: pass
         if option == 1:
             num = int(input("Adivinhe o número secreto:"))
             guess = {'op': "GUESS", 'number': num}
@@ -108,32 +110,30 @@ def run_client(client_sock, client_id):
                 print(f"O número era {recvstop[guess]}!")
                 print("SUCESS")
             else:
-                 print(f"O número era {recvstop[guess]}!")
-                 print("SUCESS")
+                print(f"O número era {recvstop[guess]}!")
+                print("SUCESS")
                 
         #Operação Quit
         elif option == 3:
             quit_action(client_sock, tries)
+        else: print("Jogada inválida")
 
     return None
 
 
 def main(argv):
     # validate the number of arguments and eventually print error message and exit with error
-    if len(argv) < 3 or len(argv) > 4:
+    if len(argv) < 3 or len(argv) > 4: #Se o número de argumentos for diferente de 3 e de 4
         print("Argumentos inválidos, deve ter o formato:")
         print("python3 client.py client_id porto [máquina]")
         exit(1)
-    elif len(argv) == 3:
+    elif len(argv) == 3: #Se houver apenas 3 argumentos
         hostname = "127.0.0.1"
-    else:
+    else: #Se houver 4 argumentos
         hostname = argv[3]
     # verify type of of arguments and eventually print error message and exit with error
 
-    # Verifica a validade do id do cliente
-    if not len(argv[2]): 
-        print("ID de client inválido!")
-        exit(2)
+    #id não necessita de validação
 
     # Verifica a validade da porta
     for i in range(0, len(int(argv[2])) - 1):
