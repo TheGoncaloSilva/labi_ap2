@@ -25,7 +25,7 @@ gamers = {}
 # return the client_id of a socket or None
 def find_client_id (client_sock):
 	for val in gamers:	# val tem o client_id de cada registo
-		if client_sock.getpeername()[1] is gamers[val][0]['socket'].getpeername()[1]: # check address of each entry
+		if client_sock == gamers[val][0]['socket']: # check address of each entry
    			return val # client_id found
 	return None
 
@@ -89,6 +89,7 @@ def new_msg (client_sock):
 	#data = cipher.encrypt (bytes("%16d" % (data), 'utf8'))
 	#data_tosend = str (base64.b64encode (data), 'utf8')
 	#result = send_dict (client_sock, response)
+	send_dict (client_sock, response) # enviar o resultado para o cliente
 	return response
 # read the client request
 # detect the operation requested by the client
@@ -111,6 +112,7 @@ def new_client (client_sock, request):
   		return { 'op': 'START', 'status': False, 'error': 'Cliente existente' }
 
 	secret_number = random.randint(0, 100) # Gera o número secreto
+	print(secret_number) # DEBUG
 	max_Plays = random.randint(10, 30) # Gera o número máximo de tentativas
 	try :
 		cipherkey = base64.b64decode (request['cipher']) # Decode cypherkey
@@ -201,7 +203,9 @@ def update_file (client_id, result): # client_id é redudante
 # Suporte da jogada de um cliente - operação GUESS
 #
 def guess_client (client_sock, request):
+	print(request)
 	client_id = find_client_id(client_sock) # Id do cliente devolvido pela função
+	print(client_id)
 	try :
 		request['number']
 	except : # Se o campo number não existir no dicionário enviado
@@ -241,8 +245,9 @@ def stop_client (client_sock, request):
 
 	response = {'op' : 'QUIT', 'status' : False, 'error' : 'Número de jogadas inconsistente/ Número secreto incorreto'}
 	write = 'FAILURE'
-	if (request['attempts'] == gamers[client_id][0]['attempts']) :
-		if ((request['number'] is gamers[client_id][0]['guess']) and gamers[client_id][0]['attempts'] < gamers[client_id][0]['max_attempts']) :
+	
+	if (str(request['attempts']) == str(gamers[client_id][0]['attempts'])) :
+		if ((str(request['number']) == str(gamers[client_id][0]['guess'])) and str(request['attempts']) < str(gamers[client_id][0]['max_attempts'])) :
 			response = {'op' : 'STOP', 'status' : True, 'guess' : gamers[client_id][0]['guess']}
 			write = 'SUCCESS'
 
@@ -308,7 +313,7 @@ def main(argv):
 				# See if client sent a message
 				if len (client_sock.recv (1, socket.MSG_PEEK)) != 0:
 					# client socket has a message
-					##print ("server" + str (client_sock))
+					print ("server" + str (client_sock))
 					new_msg (client_sock)
 				else: # Or just disconnected
 					clients.remove (client_sock)
