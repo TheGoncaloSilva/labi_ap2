@@ -265,11 +265,11 @@ def stop_client (client_sock, request):
 def main(argv):
 	# validate the number of arguments and eventually print error message and exit with error
 	# verify type of of arguments and eventually print error message and exit with error
-	if(len(argv) <= 1) :
+	if (len(argv) <= 1) :
 		print("Porto de acesso precisa de ser especificado")
 		exit(1)
-	if(int(argv[1]) <= 0) :
-		print("Valor do porto tem de ser superior a 0")
+	if (int(argv[1]) <= 0 or int(argv[1]) > 65535 ) :
+		print("Valor do porto tem de ser superior a 0 e inferior a 65535")
 		exit(2)
 	
 	port = int(argv[1])
