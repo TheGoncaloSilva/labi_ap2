@@ -62,12 +62,19 @@ def quit_action(client_sock, attempts):
 def run_client(client_sock, client_id):
     tries = 0
     print("Bem vindo aoooooooooo Adivinha o número secreto!!!!")
+    print("Deseja usar encriptação de dados?")
+    answer = input("S/N?")
+    while not(input == "S" or input == "N"):
+        answer = input("Inválido")
+    start = {'op': "START", 'id': client_id, 'cipher' : None}
+    if answer == "S":
+        key = os.urandom(16)
+        key_tosend = str (base64.b64encode (key), 'utf8')
+        start['cypher'] = key_tosend
+    recvstart = sendrecv_dict(client_sock, start)
+    if validate_response(client_sock, recvstart): return None
+
     while True:
-        start = {'op': "START", 'id': client_id, [cipher]: cypherkey}
-        recvstart = sendrecv_dict(client_sock, start)
-        if "error" in recvstart:
-            print(recvstart['error'])
-            break
 
         # Menu
         print("O que pretende fazer?")
@@ -111,41 +118,43 @@ def run_client(client_sock, client_id):
     return None
 
 
-def main():
+def main(argv):
     # validate the number of arguments and eventually print error message and exit with error
-    if len(sys.argv) != 4:
+    if len(argv) < 3 or len(argv) > 4:
         print("Argumentos inválidos, deve ter o formato:")
         print("python3 client.py client_id porto [máquina]")
-        sys.exit
+        exit(1)
+    elif len(argv) == 3:
+        hostname = "127.0.0.1"
+    else:
+        hostname = argv[3]
     # verify type of of arguments and eventually print error message and exit with error
 
     # Verifica a validade do id do cliente
-    if any(char.isdigit() for char in sys.argv[1]) or len(sys.argv[1]) <= 0:
+    if not len(argv[2]): 
         print("ID de client inválido!")
-        sys.exit
+        exit(2)
 
     # Verifica a validade da porta
-    for i in range(0, len(sys.argv[2]) - 1):
-        if sys.argv[2][i].isalpha:
-            print("Porta inválida! A porta não deve conter letras")
-            sys.exit
+    for i in range(0, len(int(argv[2])) - 1):
+        if not argv[2][i].isdigit():
+            print("Porta inválida! A porta só deve conter números")
+            exit(3)
 
-    if sys.argv[2] > 65535 or sys.argv[2] < 0:
+    if int(argv[2]) > 65535 or int(argv[2]) < 0:
         print("Porta inválida! Deve escrever um número entre 0 e 65535")
-        sys.exit
+        exit(4)
 
     # Verifica a validade da máquina
-    host = sys.argv[3].split('.')
+    host = argv[3].split('.')
     for i in range(0, len(host) - 1):
-        if host[i] < 0 or host[i] > 255:
+        if int(host[i]) < 0 or int(host[i]) > 255:
             print("Erro! A máquina é identificada da seguinte maneira:")
             print("X.X.X.X ,sendo X um número entre 0 e 255")
-            sys.exit
+            exit(5)
 
     # 127.0.0.1
-    port = sys.argv[2]
-
-    hostname = sys.argv[3]
+    port = argv[2]
 
     # Socket
     client_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -153,11 +162,11 @@ def main():
     # Ligar ao servidor
     client_sock.connect((hostname, port))
 
-    run_client(client_sock, sys.argv[1])
+    run_client(client_sock, argv[1])
 
     client_sock.close()
-    sys.exit(0)
+    exit(0)
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv)
