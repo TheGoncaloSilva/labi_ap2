@@ -182,7 +182,7 @@ def quit_client (client_sock, request):
 def create_file ():
 	# create report csv file with header
 	file = open('report.csv', 'w') # abrir ou criar o ficheiro se não existir
-	writer = csv.DictWriter(file, delimiter=',', fieldnames=['client_id', 'secret_number', 'max_plays', 'current_plays', 'result'])
+	writer = csv.DictWriter(file, delimiter=';', fieldnames=['client_id', 'secret_number', 'max_plays', 'current_plays', 'result'])
 	writer.writeheader() # Escrever os nomes das colunas
 
 	file.close()
@@ -192,9 +192,11 @@ def create_file ():
 # Suporte da actualização de um ficheiro csv com a informação do cliente e resultado
 #
 def update_file (client_id, result): # client_id é redudante
-	file = open('report.csv', 'w') # abrir o ficheiro
+	file = open('report.csv', 'A') # abrir o ficheiro
 	writer = csv.DictWriter(file, delimiter=',', fieldnames=['client_id', 'secret_number', 'max_plays', 'current_plays', 'result'])
 	writer.writerow(result)
+
+	file.close()
 	return None
 # update report csv file with the result from the client
 
@@ -243,6 +245,7 @@ def stop_client (client_sock, request):
 	if (client_id == None):
   		return { 'op': 'STOP', 'status': False, 'error': 'Cliente inexistente' }
 
+	#alterar
 	response = {'op' : 'QUIT', 'status' : False, 'error' : 'Número de jogadas inconsistente/ Número secreto incorreto'}
 	write = 'FAILURE'
 	
