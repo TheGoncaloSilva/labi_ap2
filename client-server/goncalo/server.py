@@ -23,6 +23,15 @@ from Crypto.Cipher import AES
 # Método de acesso: gamers[client_id][0][campo]
 gamers = {}
 
+# Código seguinte, usado apenas para testes
+def update_gamer(value) : # atualizar o gamers caso seje preciso
+	global gamers
+	gamers = value
+
+def print_gamer(): # mostrar o conteúdo do dicionário gamers
+	return gamers
+# Fim do código para testes
+
 # return the client_id of a socket or None
 def find_client_id (client_sock):
 	for val in gamers:	# val tem o client_id de cada registo
