@@ -98,6 +98,8 @@ def run_client(client_sock, client_id):
                     break
                 except :
                     print("Por favor introduza apenas números")
+            if (key != None) :
+                num = 
             guess = {'op': "GUESS", 'number': num}
             recvguess = sendrecv_dict(client_sock, guess)
             lastAttempt = num
