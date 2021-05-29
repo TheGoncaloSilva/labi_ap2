@@ -31,7 +31,7 @@ def decrypt_intvalue(cipherkey, data):
 # If true there's an error
 def validate_response(client_sock, response):
     if "error" in response: # Se existir a chave error no dicionário enviado pelo server
-        print(response['error']) # Mostra o erro
+        print("Erro!: " + response['error']) # Mostra o erro
         return True 
     else: 
         return False
@@ -75,7 +75,7 @@ def run_client(client_sock, client_id):
     
     start = {'op': "START", 'client_id': client_id, 'cipher' : None} # dicionário de defeito, de pedido de começo de jogo ao servidor
     key = None # Valor por defeito da chave de encriptação
-    
+
     if answer == "S": # Se o utilizador escolheu encriptar os dados
         key = os.urandom(16) # Gerar uma chave de encriptação
         start['cipher'] = str (base64.b64encode (key), 'utf8') # guardar a chave (de modo codificado) no dicionário 
@@ -95,10 +95,10 @@ def run_client(client_sock, client_id):
 
         # Menu
         print()
-        print("Tem " + str(maxAttempts - tries) + " tentativas restantes")
+        print("Tens " + str(maxAttempts - tries) + " tentativas restantes")
         print()
         print("########## MENU ##########")
-        print("# O que pretende fazer?  #")
+        print("# O que pretendes fazer? #")
         print("# 1 - Adivinhar          #")
         print("# 2 - Terminar o jogo    #")
         print("# 3 - Desistir           #")
@@ -116,14 +116,14 @@ def run_client(client_sock, client_id):
         if option == 1:
             while True :
                 try :  # testar se o cliente introduziu um caracter ou número
-                    print("Adivinhe o número secreto entre 0 e 100: ")
+                    print("Adivinha o número secreto entre 0 e 100: ")
                     num = int(input("-> "))
                     if (num <= 100 and num >= 0): # verificar se foi introduzido um número fora da condição
                         break
                     else :
-                        print("Erro!: Escolha números entre 0 e 100")
+                        print("Erro!: Escolhe números entre 0 e 100")
                 except :
-                    print("Erro!: Por favor introduza apenas números")
+                    print("Erro!: Por favor introduz apenas números")
 
             lastAttempt = num # variável global que guarda a última tentativa
 
@@ -138,18 +138,18 @@ def run_client(client_sock, client_id):
             tries += 1 # registar que o utilizador fez uma tentativa e foi processada
 
             if recvguess['result'] == "equals": # o jogador acertou o número secreto
-                print("Acertaste")
+                print("*#* Conseguiste adivinhar *#*")
                 option = 2 # mudar a escolha do utilizador, de forma a ser processado o término do jogo, pois acertou o número secreto
             elif recvguess['result'] == "smaller": # o jogador introduziu um número superior ao número secreto
-                print("O número secreto é menor do que o inserido")
+                print("DICA: O número secreto é menor do que o inserido")
             elif recvguess['result'] == "larger": # o jogador introduziu um número inferior ao número secreto
-                print("O número secreto é maior do que o inserido")
+                print("DICA: O número secreto é maior do que o inserido")
             else:
                 print("Erro!: Ocorreu um erro") # ocorreu algum Erro
 
             if(tries >= maxAttempts) : # deixa o jogador jogar n tentativas até m jogadas máximas, de forma a n = m
-                print("Número máximo de tentativas obtido. O fim do jogo vai ser processado")
-                option == 2 # mudar a escolha do utilizador, de forma a ser processado o término do jogo, pois o jogador excedeu as tentativas máximas
+                print("RESULTADO: Número máximo de tentativas obtido. O fim do jogo vai ser processado")
+                option = 2 # mudar a escolha do utilizador, de forma a ser processado o término do jogo, pois o jogador excedeu as tentativas máximas
         
         #Operação Stop
         if option == 2:
@@ -183,7 +183,7 @@ def run_client(client_sock, client_id):
                 print(condition)
                 break
 
-        if(option < 1 or option > 3): print("Valor de operação inválido") #Se a opção inserida for inválida
+        if(option < 1 or option > 3): print("ERRO!: Valor de operação inválido") #Se a opção inserida for inválida
 
     return None
 
@@ -192,7 +192,7 @@ def main(argv):
     # validate the number of arguments and eventually print error message and exit with error
     # verify type of of arguments and eventually print error message and exit with error
     if len(argv) < 3 or len(argv) > 4: # verificar se o número de argumentos introduzidos são válidos
-        print("Argumentos inválidos, deve ter o formato:")
+        print("ERRO!: Argumentos inválidos, deve ter o formato:")
         print("python3 client.py client_id porto [máquina]")
         exit(1)
     elif len(argv) == 3: # se o utilizador não introduzir um endereço ip, atribui-se um por defeito
@@ -202,25 +202,25 @@ def main(argv):
 
     # Verifica a validade do id do cliente
     if not len(argv[2]): 
-        print("ID de client inválido!")
+        print("ERRO!: ID de client inválido!")
         exit(2)
 
     # Verifica a validade da porta
     for i in range(0, len(argv[2]) - 1):
         if not argv[2][i].isdigit():
-            print("Porta inválida! A porta só deve conter números")
+            print("ERRO!: Porta inválida! A porta só deve conter números")
             exit(3)
 
     if int(argv[2]) > 65535 or int(argv[2]) < 0:
-        print("Porta inválida! Deve escrever um número entre 0 e 65535")
+        print("ERRO!: Porta inválida! Deve escrever um número entre 0 e 65535")
         exit(4)
 
     # Verifica a validade da máquina (endereço ip)
     host = hostname.split('.')
     for i in range(0, len(host) - 1):
         if int(host[i]) < 0 or int(host[i]) > 255:
-            print("Erro! A máquina é identificada da seguinte maneira:")
-            print("X.X.X.X ,sendo X um número entre 0 e 255")
+            print("ERRO!: A máquina é identificada da seguinte maneira:")
+            print("X.X.X.X , sendo X um número entre 0 e 255")
             exit(5)
 
     port = int(argv[2]) # valor atribuído à porta
