@@ -26,20 +26,20 @@ def decrypt_intvalue(cipherkey, data):
 # verify if response from server is valid or is an error message and act accordingly
 # If true there's an error
 def validate_response(client_sock, response):
-    if "error" in response:
-        print(response['error'])
-        return True
+    if "error" in response: #Se existir a chave error no dicionário enviado pelo server
+        print(response['error']) #Mostra o erro
+        return True 
     else: 
         return False
 
 
 # process QUIT operation
 def quit_action(client_sock, attempts):
-    quit = {"op": "QUIT"}
+    quit = {"op": "QUIT"} 
     recvquit = sendrecv_dict(client_sock, quit)
-    if validate_response: return recvquit['error']
+    if validate_response(client_sock, recvquit): return recvquit['error'] #se houver um erro dá return da chave do erro
     else:
-        print(f"Desistiu do jogo depois de {attempts}")
+        print(f"Desistiu do jogo depois de {attempts}") #Avisa o jogador que a operação foi efetuada
         return None
 
 
@@ -60,22 +60,25 @@ def quit_action(client_sock, attempts):
 # Suporte da execução do cliente
 #
 def run_client(client_sock, client_id):
-    tries = 0
+    tries = 0 # variavél usada para contar as tentativas feitas
+    lastAttempt = 0 # variável usada para guardar a ultima tentativa do utilizador
     print("Bem vindo aoooooooooo Adivinha o número secreto!!!!")
     print("Deseja usar encriptação de dados?")
     answer = input("S/N? ").upper()
     while answer != "S" and answer != "N":
         answer = input("Inválido")
     start = {'op': "START", 'client_id': client_id, 'cipher' : None}
-
+    key = None
     if answer == "S":
         key = os.urandom(16)
         key_tosend = str (base64.b64encode (key), 'utf8')
-        start['cypher'] = key_tosend
+        start['cipher'] = key_tosend
+        cipher = AES.new (key, AES.MODE_ECB)
 
     recvstart = sendrecv_dict(client_sock, start)
     if validate_response(client_sock, recvstart): return None
-    print(recvstart['max_attempts'])
+    print("Tentativas: " + str(recvstart['max_attempts']))
+    
     while True:
 
         # Menu
@@ -85,42 +88,53 @@ def run_client(client_sock, client_id):
         print("Desistir - 3")
         
         #Operação Guess
-        option = int(input(" "))
+        try: 
+            option = int(input(" "))
+        except: option = 999 #Se for inserido algo que não seja um número
         if option == 1:
-            num = int(input("Adivinhe o número secreto: "))
+            while True :
+                try : 
+                    num = int(input("Adivinhe o número secreto: ")) # testar se o cliente introduziu um caracter ou número
+                    break
+                except :
+                    print("Por favor introduza apenas números")
             guess = {'op': "GUESS", 'number': num}
             recvguess = sendrecv_dict(client_sock, guess)
-            tries += 1
+            lastAttempt = num
             if validate_response(client_sock, recvguess): break
-            if recvguess['result'] == "equals" and tries <= recvstart['max_attempts']:
-                print("SUCESS")
+            tries += 1
+            if recvguess['result'] == "equals":
+                print("Acertaste")
+                option = 2
             elif recvguess['result'] == "smaller":
                 print("O número secreto é menor do que o inserido")
             elif recvguess['result'] == "larger":
                 print("O número secreto é maior do que o inserido")
             else:
                 print("FAILURE")
-        
-        #Operação Stop
-        elif option == 2:
-            while True:
-                try :
-                    secNumber = input("Último número secreto ")
-                    maxAtt = input("Tentativas ")
-                    break
-                except :
-                    print("Precia de ser um número")
 
-            stop = {"op": "STOP", "number": secNumber, "attempts": maxAtt}
-            recvstop = sendrecv_dict(client_sock, stop)
-            if validate_response(client_sock, recvstop): break
-            print(f"O número é {recvstop['guess']}!")
-            print("SUCESS")
-            return None
+            if(tries >= recvstart['max_attempts']) : # deixa o jogador jogar n tentativas até m jogadas máximas, de forma a n = m
+                print("Número máximo de tentativas obtido. O fim do jogo vai ser processado")
+                option == 2
+        #Operação Stop
+        if option == 2:
+            stop = {"op": "STOP", "number": lastAttempt, "attempts": tries}
+            recvstop = sendrecv_dict(client_sock, stop) 
+            if validate_response(client_sock, recvstop): break #Se for failure, é detetado como erro
+            if((str(lastAttempt) == str(recvstop['guess']))) :
+                print(f"As tuas tentativas deram fruto e conseguiste acertar, o número secreto era {recvstop['guess']} e conseguiste acertar com " + str(tries) + " tentativas")
+            else : 
+                print(f"O número secreto era {recvstop['guess']}! Pena que não conseguiste acertar, boa sorte para a próxima")
+            exit(6) # Jogo completo
                 
         #Operação Quit
-        elif option == 3:
-            quit_action(client_sock, tries)
+        if option == 3:
+            condition = quit_action(client_sock, tries)
+            if condition == None: exit(7) #Se não houve erro
+            else: #Se houver erro
+                print(condition)
+                exit(7)
+        if(option < 1 or option > 3): print("Valor de operação inválido") #Se a opção inserida for inválida
 
     return None
 

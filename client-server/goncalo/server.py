@@ -75,6 +75,7 @@ def new_msg (client_sock):
 	except :
 		return None
 	#cipher = request['cipher'] -> cifra escolhida pelo utilizador
+	print("Request" + str(request))
 	if (op == 'START') :
 		response = new_client(client_sock, request)
 	elif (op == 'QUIT') :
@@ -85,7 +86,8 @@ def new_msg (client_sock):
 		response = stop_client(client_sock, request)
 	else :
 		response = { 'op': request['op'], 'status': False, 'error' : 'Operação Inválida' }
-
+	print("Response: " + str(response))
+	print("Gamers: " + str(gamers[find_client_id(client_sock)]))
 	#data = cipher.encrypt (bytes("%16d" % (data), 'utf8'))
 	#data_tosend = str (base64.b64encode (data), 'utf8')
 	#result = send_dict (client_sock, response)
@@ -145,7 +147,11 @@ def search_gamers(value):
 # Suporte da eliminação de um cliente
 #
 def clean_client (client_sock):
-	return None
+	client_id = find_client_id(client_sock) # Id do cliente devolvido pela função
+	if (client_id == None):
+  		return False
+	del gamers[client_id] # eliminar o cliente do dicionário de jogadores ativos
+	return True
 # obtain the client_id from his socket and delete from the dictionary
 
 
@@ -162,7 +168,7 @@ def quit_client (client_sock, request):
 	'result' : 'QUIT'} # Dicionário para guardar no ficheiro json
 	
 	update_file(client_id, result)
-	del gamers[client_id] # eliminar o cliente do dicionário de jogadores ativos
+	clean_client(client_sock)
 	return {'op': 'QUIT', 'status': True}
 # obtain the client_id from his socket
 # verify the appropriate conditions for executing this operation
@@ -192,8 +198,8 @@ def create_file ():
 # Suporte da actualização de um ficheiro csv com a informação do cliente e resultado
 #
 def update_file (client_id, result): # client_id é redudante
-	file = open('report.csv', 'A') # abrir o ficheiro
-	writer = csv.DictWriter(file, delimiter=',', fieldnames=['client_id', 'secret_number', 'max_plays', 'current_plays', 'result'])
+	file = open('report.csv', 'a') # abrir o ficheiro
+	writer = csv.DictWriter(file, delimiter=';', fieldnames=['client_id', 'secret_number', 'max_plays', 'current_plays', 'result'])
 	writer.writerow(result)
 
 	file.close()
@@ -205,9 +211,7 @@ def update_file (client_id, result): # client_id é redudante
 # Suporte da jogada de um cliente - operação GUESS
 #
 def guess_client (client_sock, request):
-	print(request)
 	client_id = find_client_id(client_sock) # Id do cliente devolvido pela função
-	print(client_id)
 	try :
 		request['number']
 	except : # Se o campo number não existir no dicionário enviado
@@ -246,12 +250,12 @@ def stop_client (client_sock, request):
   		return { 'op': 'STOP', 'status': False, 'error': 'Cliente inexistente' }
 
 	#alterar
-	response = {'op' : 'QUIT', 'status' : False, 'error' : 'Número de jogadas inconsistente/ Número secreto incorreto'}
+	response = {'op' : 'QUIT', 'status' : False, 'error' : 'Número de jogadas inconsistente'}
 	write = 'FAILURE'
 	
-	if (str(request['attempts']) == str(gamers[client_id][0]['attempts'])) :
-		if ((str(request['number']) == str(gamers[client_id][0]['guess'])) and str(request['attempts']) < str(gamers[client_id][0]['max_attempts'])) :
-			response = {'op' : 'STOP', 'status' : True, 'guess' : gamers[client_id][0]['guess']}
+	if (str(request['attempts']) == str(gamers[client_id][0]['attempts']) and str(request['attempts']) < str(gamers[client_id][0]['max_attempts'])) :
+		response = {'op' : 'STOP', 'status' : True, 'guess' : gamers[client_id][0]['guess']} # Se o jogador 
+		if ((str(request['number']) == str(gamers[client_id][0]['guess']))) :
 			write = 'SUCCESS'
 
 	result = { 'client_id' : client_id, 'secret_number' : gamers[client_id][0]['guess'], 
@@ -259,7 +263,7 @@ def stop_client (client_sock, request):
 	'result' : write} # Dicionário para guardar no ficheiro json
 			
 	update_file(client_id, result)
-	del gamers[client_id] # eliminar o cliente do dicionário de jogadores ativos
+	clean_client(client_sock)
 
 	return response
 
@@ -316,7 +320,7 @@ def main(argv):
 				# See if client sent a message
 				if len (client_sock.recv (1, socket.MSG_PEEK)) != 0:
 					# client socket has a message
-					print ("server" + str (client_sock))
+					# print ("server" + str (client_sock))
 					new_msg (client_sock)
 				else: # Or just disconnected
 					clients.remove (client_sock)
