@@ -33,10 +33,10 @@ def find_client_id (client_sock):
 # Função para encriptar valores a enviar em formato json com codificação base64
 # return int data encrypted in a 16 bytes binary string and coded base64
 def encrypt_intvalue (client_id, data):
-
+	data = int(data)
 	cipher = AES.new (gamers[client_id][0]['cipher'], AES.MODE_ECB) # Definir o algoritmo de encriptação tendo em conta a chave fornecida
-	data = cipher.encrypt (bytes("%16d" % (data), 'utf8'))
-	return str (base64.b64encode (data), 'utf8')
+	result = cipher.encrypt (bytes("%16d" % (data), 'utf8'))
+	return str (base64.b64encode (result), 'utf8') # resultado encriptado
 	
 
 
@@ -44,8 +44,9 @@ def encrypt_intvalue (client_id, data):
 # return int data decrypted from a 16 bytes binary string and coded base64
 def decrypt_intvalue (client_id, data):
 	cipher = AES.new (gamers[client_id][0]['cipher'], AES.MODE_ECB) # Definir o algoritmo de encriptação tendo em conta a chave fornecida
-	data = base64.b64decode (data)
-	return int (str (cipher.decrypt (data)))
+	result = base64.b64decode (data)
+	result = cipher.decrypt (result)
+	return int (str (result, 'utf8'))
 
 
 #
@@ -68,8 +69,6 @@ def decrypt_intvalue (client_id, data):
 def new_msg (client_sock):
 	response = {}
 	request = recv_dict (client_sock)
-	#data = base64.b64decode (request['value'])
-	#data = cipher.decrypt (data)
 	try : # se um cliente aceder sem o formato correto
 		op = request['op'].upper() # Operação escolhida pelo cliente (name.upper para não haver problemas com letras minúsculas e maiúsculas)
 	except :
@@ -87,10 +86,7 @@ def new_msg (client_sock):
 	else :
 		response = { 'op': request['op'], 'status': False, 'error' : 'Operação Inválida' }
 	print("Response: " + str(response))
-	print("Gamers: " + str(gamers[find_client_id(client_sock)]))
-	#data = cipher.encrypt (bytes("%16d" % (data), 'utf8'))
-	#data_tosend = str (base64.b64encode (data), 'utf8')
-	#result = send_dict (client_sock, response)
+	#print("Gamers: " + str(gamers[find_client_id(client_sock)]))
 	send_dict (client_sock, response) # enviar o resultado para o cliente
 	return response
 # read the client request
@@ -220,10 +216,13 @@ def guess_client (client_sock, request):
 	if (client_id == None):
   		return { 'op': 'GUESS', 'status': False, 'error': 'Cliente inexistente' }
 	gamers[client_id][0]['attempts'] += 1 # contar uma tentativa
+	clientNumber = request['number']
+	if (gamers[client_id][0]['cipher'] != None) :
+		clientNumber = decrypt_intvalue(client_id, clientNumber)
 	result = ''
-	if(request['number'] < gamers[client_id][0]['guess']) :
+	if(clientNumber < gamers[client_id][0]['guess']) :
 		result = 'larger'
-	elif (request['number'] > gamers[client_id][0]['guess']) :
+	elif (clientNumber > gamers[client_id][0]['guess']) :
 		result = 'smaller'
 	else : 
 		result = 'equals'
@@ -241,21 +240,26 @@ def stop_client (client_sock, request):
 	client_id = find_client_id(client_sock) # Id do cliente devolvido pela função
 
 	try :
-		request['attempts']
-		request['number']
+		user_attempts = request['attempts']
+		user_number = request['number']
 	except : # Se o campo number e attempts não existir no dicionário enviado
-		return { 'op': 'GUESS', 'status': False, 'error': 'Condições inválidas' }
-
+		return { 'op': 'STOP', 'status': False, 'error': 'Condições inválidas' }
+	
 	if (client_id == None):
   		return { 'op': 'STOP', 'status': False, 'error': 'Cliente inexistente' }
 
-	#alterar
+	if (gamers[client_id][0]['cipher'] != None) :
+		user_attempts = decrypt_intvalue(client_id, user_attempts)
+		user_number = decrypt_intvalue(client_id, user_number)
+
 	response = {'op' : 'QUIT', 'status' : False, 'error' : 'Número de jogadas inconsistente'}
 	write = 'FAILURE'
-	
-	if (str(request['attempts']) == str(gamers[client_id][0]['attempts']) and str(request['attempts']) < str(gamers[client_id][0]['max_attempts'])) :
-		response = {'op' : 'STOP', 'status' : True, 'guess' : gamers[client_id][0]['guess']} # Se o jogador 
-		if ((str(request['number']) == str(gamers[client_id][0]['guess']))) :
+
+	if (int(user_attempts) == int(gamers[client_id][0]['attempts']) and int(user_attempts) <= int(gamers[client_id][0]['max_attempts'])) :
+		response = {'op' : 'STOP', 'status' : True, 'guess' : gamers[client_id][0]['guess']} # Se o jogador indicar o número correto de tentativas e elas forem menores ou igual ao número máximo
+		if (gamers[client_id][0]['cipher'] != None) :
+			response['guess'] = encrypt_intvalue(client_id, gamers[client_id][0]['guess'])
+		if ((int(user_number) == int(gamers[client_id][0]['guess']))) :
 			write = 'SUCCESS'
 
 	result = { 'client_id' : client_id, 'secret_number' : gamers[client_id][0]['guess'], 
