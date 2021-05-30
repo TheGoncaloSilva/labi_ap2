@@ -137,7 +137,7 @@ as conclusões do trabalho.
 Nesta secção será apresentada a metodologica no ficheiro client.py
 
 \subsection{Função main}
-
+\label{ssec:main}
 Devido ao facto do cliente ser invocado com o comando, esses python3 client.py client\_id porto [máquina]"
 argumentos têm de ser validados. Para começar, devem ser colocados 3 ou 4 argumentos (máquina é opcional).
 Caso não tenha nenhuma destas quantidades, é enviada uma mensagem de erro. Caso o tamanho seja 3, a máquina é
@@ -156,18 +156,53 @@ Após esta verificação, é criado o socket com a porta e máquina indicados na
 função run\_client, que é onde se vai passar o jogo. Quando terminar, é fechado o socket e o cliente termina.
 
 \subsection{Função run\_client}
+\label{ssec:runclient}
 A função run\_client é invocada na main. O cliente é introduzido ao jogo e é-lhe questionado se pretende encriptação
 de dados (S/N). Enquanto a respotas for diferente dessas duas letras, é enviada uma mensagem de erro. Após a inserção da
 opção, é criado um dicionário start com o id e a cifra do cliente. Se foi inserido "S", é criada uma chave que é inserida
 no dicionário start na chave cipher. É usada a função sendrecv\_dict do common\_comm como recomendado para enviar start
 e receber a resposta do servidor(recvstart). É verificado se houve algum erro no início do jogo através de validate\_response,
-se houve termina, senão a variável maxAttempts fica com o valor correspondente em recvstart(desencriptada caso necessário).
+se houve termina, senão a variável maxAttempts fica com o valor correspondente em recvstart(desencriptada caso necessário). É escrito no ecrã do cliente as tentativas máximas que tem para adivinhar o número e um menu com as opções que pode fazer
+, onde o cliente pode escolher o que fazer. É verificado se o que o cliente inseriu é um número ou não através de um try/except
+, onde caso não seja inserido um número, a opção fica com o valor 999 por defeito pois no final da run\_client, essa operação é
+ reconhecida como desconhecida e é relatado. Se a opção inserida for 1, é iniciada a operação start, como indicada no menu. 
+\subsubsection{Opção 1}
+\label{sssec:first}
+
+O cliente insere a sua tentativa de adivinhar o número secreto, que é verificada num try/except e, caso seja inválido, dá
+erro e é pedida novamente porque encontra-se dentro de um ciclo "while True". Depois de escolhida a opção, é encriptada
+caso haja encriptação. É criado um dicionário típico da operação start ({'op': "GUESS", 'number': num}, sendo num a tentativa)
+e é enviado para o servidor, recebendo ao mesmo tempo a resposta através de sendrecv\_dict e guardada em recvguess. A resposta é
+é validada (validate\_response) e a tentativa é registada em tries. Se o jogador acertou no número, é dito ao cliente e é redirecionado
+para a opção 2, se foi maior ou menor ("smaller"/"larger") é também escrito no ecrã esse resultado. Se o número de tentativas
+exceder o máximo estipulado pelo servidor, é dito ao cliente e este é redirecionado para a opção 2.
+\subsubsection{Opção 2}
+\label{sssec:second}
+
+Na opção 2, é guardada a última tentativa do jogador em lastAttempt\_toSend, que é encriptada caso tenha sido escolhida encriptação.
+É então criado o diconário típico desta operação ({"op": "STOP", "number": lastAttempt\_toSend, "attempts": tries\_toSend}, sendo
+tries\_toSend o número de tentativas feitas). É enviado este dicionário e recebido outro pelo mesmo processo que foi descrito para
+a operação 1, só que a resposta é armazenada em recvstop. Essa resposta é validada (validate\_response, caso haja quer dizer que
+o jogador excedeu o número de jogadas e perdeu o jogo, é dito ao cliente isso e sai do jogo)
+e o número secreto, que está na chave 'guess' de recvstop é armazenada em returnGuess, que é desencriptado se houver encriptação.
+Se a última tentativa do jogador for igual ao número secreto, o jogador acertou e ganhou o jogo, senão perdeu. Em ambos os casos
+o cliente é informado do seu resultado e sai do jogo.
+\subsubsection{Opção 3}
+\label{sssec:third}
+Na opção 3, o jogador é enviado para a função quit\_action, onde é sistematizada toda a operação esta operação. O output da função
+é armazenado em condition. Se condition tiver o valor None, não houve erro e o cliente sai do jogo. Caso contrário, o erro é
+dito ao cliente e este sai do jogo.
+
+\paragraph{}
+No fim de todo este código, encontra-se a condição que é executada se o número da operação inserida pelo cliente for inválido. Nessa situação, o cliente é informado deste problema e, visto que tudo isto se encontra dentro de um ciclo "while True", o jogador volta ao menu para escolher outra opção.
 \subsection{Função validate\_response}
+\label{ssec:validate}
 A função validate\_response procura por uma chave "error" no dicionário response, que corresponde à resposta de um servidor
 ao que foi enviado pelo cliente. Visto que, quando existe um erro, seja qual for a operação, esta chave é enviada, é feita essa
 procura e, se existir, é enviado um valor booleano True, caso contrário é enviado False
 
 \subsection{Função quit\_operation}
+\label{ssec:quit}
 Nesta função, é criado um dicionário quit com uma única chave com o nome da operação "QUIT". O dicionário recvquit é criado
 para receber a resposta do servidor ao enviar quit através de sendrecv\_dict. Se a função validate\_response verificar que existe
 um erro, é enviado o return da chave do erro. Se não houver erro, o cliente é informado que desistiu depois de x tentativas,
