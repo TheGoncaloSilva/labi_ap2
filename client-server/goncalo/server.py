@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-
+# -*- coding: utf-8 -*-
 import sys
 import socket
 import select
@@ -7,7 +7,7 @@ import json
 import base64
 import csv
 import random
-
+import os
 from Crypto import Cipher
 from common_comm import send_dict, recv_dict, sendrecv_dict
 
@@ -24,12 +24,19 @@ from Crypto.Cipher import AES
 gamers = {}
 
 # Código seguinte, usado apenas para testes
-def update_gamer(value) : # atualizar o gamers caso seje preciso
+def write_gamer(value) : # overwrite o gamers caso seje preciso
 	global gamers
 	gamers = value
 
+def update_gamer(value) : # atualizar o gamers caso seje preciso
+	global gamers
+	gamers.update(value)
+
 def print_gamer(): # mostrar o conteúdo do dicionário gamers
 	return gamers
+
+def print_client(client_id):
+	return gamers[client_id]
 # Fim do código para testes
 
 # return the client_id of a socket or None
@@ -117,7 +124,7 @@ def new_client (client_sock, request):
 	except :
 		return { 'op': 'START', 'status': False, 'error': 'Condições inválidas' }
 
-	if (search_gamers(request['client_id']) != None): # Procurar se o client já está registado
+	if (search_gamers(request['client_id']) != None) : # Procurar se o client já está registado
   		return { 'op': 'START', 'status': False, 'error': 'Cliente existente' }
 
 	secret_number = random.randint(0, 100) # Gera o número secreto
@@ -147,9 +154,9 @@ def new_client (client_sock, request):
 # Procurar no dicionário gamers se já existe um jogador
 # value = client_id
 #
-def search_gamers(value): 
+def search_gamers(value):
 	for val in gamers:
-		if value == gamers[val]: # Check each line 
+		if value == val: # Check each line 
    			return val # client_found
 	return None
 
@@ -172,6 +179,11 @@ def clean_client (client_sock):
 #
 def quit_client (client_sock, request):
 	client_id = find_client_id(client_sock) # Id do cliente devolvido pela função
+
+	try : # Testar se o cliente escolheu a operação certa
+		request['op'] == "QUIT"
+	except :
+		return { 'op': 'QUIT', 'status': False, 'error': 'Erro na operação' }
 
 	if (client_id == None): # Se não existir nenhum cliente no dicionário de jogadores atuais
   		return { 'op': 'QUIT', 'status': False, 'error': 'Cliente inexistente' }
