@@ -194,7 +194,7 @@ def main(argv):
     if len(argv) < 3 or len(argv) > 4: # verificar se o número de argumentos introduzidos são válidos
         print("ERRO!: Argumentos inválidos, deve ter o formato:")
         print("python3 client.py client_id porto [máquina]")
-        exit(1)
+        exit(4)
     elif len(argv) == 3: # se o utilizador não introduzir um endereço ip, atribui-se um por defeito
         hostname = "127.0.0.1"
     else : # atribuir o endereço ip
@@ -203,13 +203,13 @@ def main(argv):
     # Verifica a validade do id do cliente
     if not len(argv[1]): 
         print("ERRO!: ID de client inválido!")
-        exit(2)
+        exit(4)
 
     # Verifica a validade da porta
     for i in range(0, len(argv[2]) - 1):
         if not argv[2][i].isdigit():
             print("ERRO!: Porta inválida! A porta só deve conter números")
-            exit(3)
+            exit(4)
 
     if int(argv[2]) > 65535 or int(argv[2]) < 0:
         print("ERRO!: Porta inválida! Deve escrever um número entre 0 e 65535")
@@ -218,10 +218,16 @@ def main(argv):
     # Verifica a validade da máquina (endereço ip)
     host = hostname.split('.')
     for i in range(0, len(host) - 1):
+        try : # o valor não é inteiro
+            int(host[i])
+            int(host[i])
+        except :
+            print("ERRO!: A máquina tem de ter números inteiros:")
+            exit(4)
         if int(host[i]) < 0 or int(host[i]) > 255:
             print("ERRO!: A máquina é identificada da seguinte maneira:")
             print("X.X.X.X , sendo X um número entre 0 e 255")
-            exit(5)
+            exit(4)
 
     port = int(argv[2]) # valor atribuído à porta
 
@@ -233,7 +239,7 @@ def main(argv):
         client_sock.connect((hostname, port))
     except :
         print("Erro!: Aconteceu algum erro e a ligação não foi estabelecida")
-        exit(10)
+        exit(3)
 
     run_client(client_sock, argv[1]) # função para efetuar todas as operações
 
