@@ -16,13 +16,13 @@
 %%
 % Definições
 %
-\def\titulo{TRABALHO DE APROFUNDAMENTO 2}
-\def\data{30/05/2021}
-\def\autores{Gonçalo Silva, Samuel Teixeira}}
-\def\autorescontactos{(103244) goncalolsilva@ua.pt, (103325) steixeira@ua.pt}
-\def\versao{VERSAO INICIAL}
-\def\departamento{DEPARTAMENTO DE ELETRÓNICA, TELECOMUNICAÇÕES E INFORMÁTICA}
-\def\empresa{UNIVERSIDADE DE AVEIRO}
+\def\titulo{TÍTULO DO RELATÓRIO}
+\def\data{DATA}
+\def\autores{Autor1, Autor2}
+\def\autorescontactos{(nmec1) autor1@ua.pt, (nmec2) autor2@ua.pt}
+\def\versao{VERSAO}
+\def\departamento{DEPARTAMENTO}
+\def\empresa{EMPRESA}
 \def\logotipo{ua.pdf}
 %
 %%%%%% CAPA %%%%%%
@@ -78,7 +78,16 @@
 
 %%%%%% RESUMO %%%%%%
 \begin{abstract}
-Resumo de 200-300 palavras.
+Este projeto foi realizado no âmbito da cadeira LABI (acr) do 1º ano do MIECT.
+Consiste em criar um servidor em que os clientes se conectam para jogar um jogo de
+adivinha o número secreto. Para além disso, também tivemos que fazer este mesmo 
+relatório em que nós explicamos o projeto: objetivo, motivação, a metodologia utilizada, resultados e
+conclusões. Na metodologia, será relatado em pormenor o nosso código feito para criar o servidor, tanto
+código do cliente como do servidor, o modo de funcionamento, testagem e comandos git feitos para tal.
+Nos resultados, será mostrado o fruto de todo o nosso código que é o servidor a funcionar.
+Por fim, nas conclusões, retira-se o que se alcançou com este projeto, o que aprendemos,
+o quão útil este projeto é para compreendermos esta matéria da cadeira de LABI e o 
+quão interessante foi realizá-lo.
 \end{abstract}
 
 %%%%%% Agradecimentos %%%%%%
@@ -103,7 +112,15 @@ Comentar bloco caso não existam agradecimentos a fazer.
 \chapter{Introdução}
 \label{chap.introducao}
 
-Introduz o tema, apresenta a motivação e finalmente a estrutura.
+O objetivo do jogo é que o cliente adivinhe um número secreto entre 0 e 100 criado 
+aleatoriamente pelo servidor, dentro de um determinado número de tentativas dadas também
+pelo servidor. O cliente tem a possibilidade de realizar quatro operações diferentes. A primeira
+serve para iniciar o jogo (START), a segunda serve para tentar adivinhar o número secreto (GUESS), 
+a terceira serve para desistir do jogo (STOP) e a última serve para sair (QUIT). O servidor deve responder
+adequadamente aquando da operação pretendida. Se houver algum erro, como um cliente inexistente, o 
+servidor deve dar uma resposta adequada ao cliente. No final do jogo, o servidor guarda num ficheiro
+.csv os dados do cliente que jogou o jogo. Para efeitos de segurança, o cliente possui ainda a
+possibilidade de escolher se quer que os seus dados sejam encriptados ou não.
 
 Este documento está dividido em quatro capítulos.
 Depois desta introdução,
@@ -113,29 +130,20 @@ sendo estes discutidos no \autoref{chap.analise}.
 Finalmente, no \autoref{chap.conclusao} são apresentadas
 as conclusões do trabalho.
 
+
 \chapter{Metodologia}
 \label{chap.metodologia}
-Descreve os métodos utilizados para obtenção de resultados.
+\section{Cliente}
+Nesta secção será apresentada a metodologica no ficheiro client.py
 
-Neste esqueleto de relatório aproveitamos este capítulo para exemplificar
-como se usam alguns elementos de {\LaTeX}.
+\subsection{Função main e run client}
+
+
+\section{Servidor}
+
 
 \section{Exemplos}
 
-\subsection{Utilização de acrónimos}
-\label{sec.util}
-Esta é a primeira invocação do acrónimo \ac{ua}.
-E esta é a segunda: \ac{ua}.
-
-
-Outras duas referências a \ac{miect}
-e \ac{miect}.
-
-\subsection{Referências bibliográficas}
-Informação relativa à estrutura formal de um relatório pode ser obtida
-na página do \ac{glisc}\cite{glisc}.
-
-Como foi apresentado na \autoref{sec.util}...
 
 \chapter{Resultados}
 \label{chap.resultados}
