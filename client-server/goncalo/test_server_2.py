@@ -1,4 +1,3 @@
-
 import pytest
 import sys
 import csv
@@ -6,6 +5,29 @@ import os
 from server import * # importar todas as funções do servidor
 
 gamers = {} # criar o dicionário global com a informação relativa aos clientes
+
+# Função para testar
+def test_end_to_end_1():
+    client_sock = "socket1"
+    client_id = "goncalo"
+
+    # Começar jogo
+    request = {'op': "START", 'client_id': client_id, 'cipher' : None} # dicionário de defeito, de pedido de começo de jogo ao servidor
+    result = new_client(client_sock, request)
+    if (result['status'] == True) :
+        gamers.update(print_gamer()[client_id]) # atualizar o dicinário gamers local
+
+    # Adivinha número
+    request = {'op': "GUESS", 'number': number}
+    result = guess_client(client_sock, request)
+
+
+    #print(result) DEBUG
+    #print(print_gamer()) DEBUG
+    return result # contém o número secreto em print_gamer()
+
+#def test_various_conditions():
+    
 
 # Testar a função de busca do id do cliente pelo socket
 # Pré-requisitos: Registo no dicionário gamers
@@ -100,9 +122,9 @@ def test_quit(client_sock) :
 # Verificar que os dados foram acrescentados ao ficheiro
 def check_file(request):
     file = open('report.csv', 'r') # abrir o ficheiro para ler 
-    csv_reader = csv.reader(file, delimiter=';') # guardar o ficheiro como leitura csv
+    csv_reader = csv.reader(file, delimiter=';', fieldnames=['client_id', 'secret_number', 'max_plays', 'current_plays', 'result']) # guardar o ficheiro como leitura csv
     for row in csv_reader: # percorrer o ficheiro
-        if(str(row[0]) == str(request['client_id']) and int(row[1]) == int(request['secret_number']) and int(row[2]) == int(request['max_plays']) and int(row[3]) == int(request['current_plays']) and str(row[4]) == str(request['result'])) :
+        if(row['client_id'] == request['client_id'] and row['secret_number'] == request['secret_number'] and row['max_plays'] == request['max_plays'] and row['current_plays'] == request['current_plays'] and row['result'] == request['result']) :
             return True # linha correta encontrada
     return False # valor por defeito
 
@@ -122,16 +144,9 @@ def main() :
     
     test_create_file() # limpar os dados existentes no ficheiro
     test_new_client_non_encripted("socket1", "goncalo")
-    assert test_find_client_id("socket1") != None # garantir que o cliente foi criado
-    print(print_client("goncalo"))
-    test_guess_client_non_encripted("socket1", 10)
-
     assert test_new_client_non_encripted("socket2", "goncalo")['status'] == False, "Ocorreu um erro" # Este teste, tem de falhar
     test_new_client_non_encripted("socket2", "francisco")
-    assert test_find_client_id("socket2") != None # garantir que o cliente foi criado
-
     test_new_client_encripted("socket3", "manuel", key = os.urandom(16))
-    assert test_find_client_id("socket3") != None # garantir que o cliente foi criado
 
     
 

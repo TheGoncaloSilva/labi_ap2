@@ -201,7 +201,7 @@ def main(argv):
         hostname = argv[3]
 
     # Verifica a validade do id do cliente
-    if not len(argv[2]): 
+    if not len(argv[1]): 
         print("ERRO!: ID de client inválido!")
         exit(2)
 
