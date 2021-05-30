@@ -16,13 +16,13 @@
 %%
 % Definições
 %
-\def\titulo{TRABALHO DE APROFUNDAMENTO 2}
-\def\data{30/05/2021}
-\def\autores{Gonçalo Silva, Samuel Teixeira}}
-\def\autorescontactos{(103244) goncalolsilva@ua.pt, (103325) steixeira@ua.pt}
-\def\versao{VERSAO INICIAL}
-\def\departamento{DEPARTAMENTO DE ELETRÓNICA, TELECOMUNICAÇÕES E INFORMÁTICA}
-\def\empresa{UNIVERSIDADE DE AVEIRO}
+\def\titulo{TÍTULO DO RELATÓRIO}
+\def\data{DATA}
+\def\autores{Autor1, Autor2}
+\def\autorescontactos{(nmec1) autor1@ua.pt, (nmec2) autor2@ua.pt}
+\def\versao{VERSAO}
+\def\departamento{DEPARTAMENTO}
+\def\empresa{EMPRESA}
 \def\logotipo{ua.pdf}
 %
 %%%%%% CAPA %%%%%%
@@ -78,7 +78,16 @@
 
 %%%%%% RESUMO %%%%%%
 \begin{abstract}
-Resumo de 200-300 palavras.
+Este projeto foi realizado no âmbito da cadeira LABI (acr) do 1º ano do MIECT.
+Consiste em criar um servidor em que os clientes se conectam para jogar um jogo de
+adivinha o número secreto. Para além disso, também tivemos que fazer este mesmo 
+relatório em que nós explicamos o projeto: objetivo, motivação, a metodologia utilizada, resultados e
+conclusões. Na metodologia, será relatado em pormenor o nosso código feito para criar o servidor, tanto
+código do cliente como do servidor, o modo de funcionamento, testagem e comandos git feitos para tal.
+Nos resultados, será mostrado o fruto de todo o nosso código que é o servidor a funcionar.
+Por fim, nas conclusões, retira-se o que se alcançou com este projeto, o que aprendemos,
+o quão útil este projeto é para compreendermos esta matéria da cadeira de LABI e o 
+quão interessante foi realizá-lo.
 \end{abstract}
 
 %%%%%% Agradecimentos %%%%%%
@@ -103,7 +112,15 @@ Comentar bloco caso não existam agradecimentos a fazer.
 \chapter{Introdução}
 \label{chap.introducao}
 
-Introduz o tema, apresenta a motivação e finalmente a estrutura.
+O objetivo do jogo é que o cliente adivinhe um número secreto entre 0 e 100 criado 
+aleatoriamente pelo servidor, dentro de um determinado número de tentativas dadas também
+pelo servidor. O cliente tem a possibilidade de realizar quatro operações diferentes. A primeira
+serve para iniciar o jogo (START), a segunda serve para tentar adivinhar o número secreto (GUESS), 
+a terceira serve para desistir do jogo (STOP) e a última serve para sair (QUIT). O servidor deve responder
+adequadamente aquando da operação pretendida. Se houver algum erro, como um cliente inexistente, o 
+servidor deve dar uma resposta adequada ao cliente. No final do jogo, o servidor guarda num ficheiro
+.csv os dados do cliente que jogou o jogo. Para efeitos de segurança, o cliente possui ainda a
+possibilidade de escolher se quer que os seus dados sejam encriptados ou não.
 
 Este documento está dividido em quatro capítulos.
 Depois desta introdução,
@@ -113,29 +130,53 @@ sendo estes discutidos no \autoref{chap.analise}.
 Finalmente, no \autoref{chap.conclusao} são apresentadas
 as conclusões do trabalho.
 
+
 \chapter{Metodologia}
 \label{chap.metodologia}
-Descreve os métodos utilizados para obtenção de resultados.
+\section{Cliente}
+Nesta secção será apresentada a metodologica no ficheiro client.py
 
-Neste esqueleto de relatório aproveitamos este capítulo para exemplificar
-como se usam alguns elementos de {\LaTeX}.
+\subsection{Função main}
+
+Devido ao facto do cliente ser invocado com o comando, esses python3 client.py client\_id porto [máquina]"
+argumentos têm de ser validados. Para começar, devem ser colocados 3 ou 4 argumentos (máquina é opcional).
+Caso não tenha nenhuma destas quantidades, é enviada uma mensagem de erro. Caso o tamanho seja 3, a máquina é
+a local(127.0.0.1), caso seja 4 a máquina é o último argumento. 
+
+O client\_id não possui qualquer tipo de restrição, 
+logo a única verificação feita é se ele existe (len(argv[1])). Para a porta, existem 2 condições: a porta inserida é 
+constituída apenas por números e esse número encontra-se entre 0 e 65535. Para isso, percorre-se todos os caractéres 
+da string e, caso não seja um dígito, é enviada uma mensagem de erro.
+
+Por fim, a máquina tem de ser verificada,
+os seus números entre cada "." estão compreendidos no intervalo ]0, 255]. Os números são colocados num array através
+do método ".split('.')" e, caso algum não satisfaça a condição, é enviada mensagem de erro.
+
+Após esta verificação, é criado o socket com a porta e máquina indicados na invocação, tenta-se estabelecer conexão e chama-se a 
+função run\_client, que é onde se vai passar o jogo. Quando terminar, é fechado o socket e o cliente termina.
+
+\subsection{Função run\_client}
+A função run\_client é invocada na main. O cliente é introduzido ao jogo e é-lhe questionado se pretende encriptação
+de dados (S/N). Enquanto a respotas for diferente dessas duas letras, é enviada uma mensagem de erro. Após a inserção da
+opção, é criado um dicionário start com o id e a cifra do cliente. Se foi inserido "S", é criada uma chave que é inserida
+no dicionário start na chave cipher. É usada a função sendrecv\_dict do common\_comm como recomendado para enviar start
+e receber a resposta do servidor(recvstart). É verificado se houve algum erro no início do jogo através de validate\_response,
+se houve termina, senão a variável maxAttempts fica com o valor correspondente em recvstart(desencriptada caso necessário).
+\subsection{Função validate\_response}
+A função validate\_response procura por uma chave "error" no dicionário response, que corresponde à resposta de um servidor
+ao que foi enviado pelo cliente. Visto que, quando existe um erro, seja qual for a operação, esta chave é enviada, é feita essa
+procura e, se existir, é enviado um valor booleano True, caso contrário é enviado False
+
+\subsection{Função quit\_operation}
+Nesta função, é criado um dicionário quit com uma única chave com o nome da operação "QUIT". O dicionário recvquit é criado
+para receber a resposta do servidor ao enviar quit através de sendrecv\_dict. Se a função validate\_response verificar que existe
+um erro, é enviado o return da chave do erro. Se não houver erro, o cliente é informado que desistiu depois de x tentativas,
+sendo x "attempts"
+\section{Servidor}
+
 
 \section{Exemplos}
 
-\subsection{Utilização de acrónimos}
-\label{sec.util}
-Esta é a primeira invocação do acrónimo \ac{ua}.
-E esta é a segunda: \ac{ua}.
-
-
-Outras duas referências a \ac{miect}
-e \ac{miect}.
-
-\subsection{Referências bibliográficas}
-Informação relativa à estrutura formal de um relatório pode ser obtida
-na página do \ac{glisc}\cite{glisc}.
-
-Como foi apresentado na \autoref{sec.util}...
 
 \chapter{Resultados}
 \label{chap.resultados}
@@ -147,7 +188,14 @@ Analisa os resultados.
 
 \chapter{Conclusões}
 \label{chap.conclusao}
-Apresenta conclusões.
+Com este trabalho, conseguimos solidificar o nosso conhecimento de servidores em python, sockets, interações entre 
+cliente e servidor e criação de algoritmos para tal, bem como encriptação e desencriptação de dados para uma partilha
+de informação mais segura. Houve também uma aproximação à linguagem Python e a toda à sua sintaxe e características.
+Sendo Python uma linguagem com bastante procura no mercado de trabalho, a criação do servidor veio ajudar a compreender
+a sua autenticidade e pas suas diferenças em relação a outras linguagens com que já estamos habituados (Ex: Java)
+Apesar das adversidades, acreditamos que o trabalho foi conseguido com sucesso, conseguimos criar um servidor 
+com o jogo referido e com todas as características necessárias para tal, utilizando os recursos que nos foram dados
+e auxiliando a sua compreensão com este relatório.
 
 \chapter*{Contribuições dos autores}
 Resumir aqui o que cada autor fez no trabalho.
