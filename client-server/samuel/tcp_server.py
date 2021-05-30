@@ -14,7 +14,9 @@ def main ():
 
 	# aceitar novos clientes
 	client_s, client_addr = tcp_s.accept ()
-	
+	print("Nova entrada")
+	print(str(client_s.getpeername()[0]) + " : " + str(client_s.getpeername()[1]))
+	print(client_s)
 	request = recv_dict (client_s)
 	cipherkey = base64.b64decode (request['cipher'])
 	cipher = AES.new (cipherkey, AES.MODE_ECB)
