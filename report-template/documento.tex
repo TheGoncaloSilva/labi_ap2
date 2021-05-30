@@ -9,6 +9,30 @@
 \usepackage{hyperref} % para autoref
 \usepackage{graphicx}
 
+\usepackage{listings}
+\usepackage{color}
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+\lstset{frame=tb,
+  language=Python,
+  aboveskip=3mm,
+  belowskip=3mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\small\ttfamily},
+  numbers=none,
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{dkgreen},
+  stringstyle=\color{mauve},
+  breaklines=true,
+  breakatwhitespace=true,
+  tabsize=3
+}
+
 \bibliography{bibliografia}
 
 
@@ -16,13 +40,13 @@
 %%
 % Definições
 %
-\def\titulo{TÍTULO DO RELATÓRIO}
+\def\titulo{Adivinha o Número Secreto}
 \def\data{DATA}
-\def\autores{Autor1, Autor2}
-\def\autorescontactos{(nmec1) autor1@ua.pt, (nmec2) autor2@ua.pt}
-\def\versao{VERSAO}
-\def\departamento{DEPARTAMENTO}
-\def\empresa{EMPRESA}
+\def\autores{Gonçalo Silva, Samuel Teixeira}
+\def\autorescontactos{(103) goncalol@ua.pt, (103325) steixeira@ua.pt}
+\def\versao{VERSAO 1.0}
+\def\departamento{Departamento de Eletrónica, Telecomunicações e Informática}
+\def\empresa{Universidade de Aveiro}
 \def\logotipo{ua.pdf}
 %
 %%%%%% CAPA %%%%%%
@@ -154,6 +178,15 @@ do método ".split('.')" e, caso algum não satisfaça a condição, é enviada 
 
 Após esta verificação, é criado o socket com a porta e máquina indicados na invocação, tenta-se estabelecer conexão e chama-se a 
 função run\_client, que é onde se vai passar o jogo. Quando terminar, é fechado o socket e o cliente termina.
+
+\begin{lstlisting}
+
+
+
+
+
+
+\end{lstlisting}
 
 \subsection{Função run\_client}
 \label{ssec:runclient}
