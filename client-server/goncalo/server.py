@@ -319,15 +319,16 @@ def main(argv):
 	if (len(argv) <= 1) : # se os argumentos não forem os suficientes
 		print("Porto de acesso precisa de ser especificado")
 		exit(1) # fechar o programa
-	if (int(argv[1]) <= 0 or int(argv[1]) > 65535 ) : # testar o valor do porto e verificar a condição
-		print("Valor do porto tem de ser superior a 0 e inferior a 65535")
-		exit(2)
-	
+
 	try : # testar se o valor é um número
 		port = int(argv[1])
 	except :
 		print("O valor do porto de acesso precisa de ser um número")
 		exit(3)
+
+	if (port <= 0 or port > 65535 ) : # testar o valor do porto e verificar a condição
+		print("Valor do porto tem de ser superior a 0 e inferior a 65535")
+		exit(2)
 
 	server_socket = socket.socket (socket.AF_INET, socket.SOCK_STREAM)
 	try: # tentar a conecção
