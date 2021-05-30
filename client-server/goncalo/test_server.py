@@ -1,101 +1,37 @@
-
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# run program: python3 -m pytest test_server.py
 import pytest
-import sys
-import csv
 import os
+import sys
+import socket
+import select
+import json
+import base64
+import csv
+import random
+from Crypto import Cipher
+from Crypto.Cipher import AES
 from server import * # importar todas as funções do servidor
 
 gamers = {} # criar o dicionário global com a informação relativa aos clientes
 
 # Testar a função de busca do id do cliente pelo socket
 # Pré-requisitos: Registo no dicionário gamers
-def test_find_client_id(client_sock) :
-    return find_client_id(client_sock)
+def test_find_client_id() :
+    write_gamer({'goncalo' : [{ 'socket': 'socket1', 'cipher' : None,
+			'guess' : 12, 'max_attempts' : 24, 'attempts' : 0 }]}) # criar um resultado no servidor
+    assert find_client_id("socket1") != None, "Cliente não encontrado" # garantir que o resultado ficou guardado
+    clean_client('socket1') # apagar o resultado
 
 # Testar a funcionalidade de encritptação
 # Pré-requisitos: Registo no dicionário gamers
-def test_encription(client_id, number) :
-    assert number == decrypt_intvalue(client_id, encrypt_intvalue(client_id, number))
-
-# Testar a função new client do servidor SEM encriptação
-# Pré-requisitos: nenhum
-def test_new_client_non_encripted(client_sock, client_id) :
-    request = {'op': "START", 'client_id': client_id, 'cipher' : None} # dicionário de defeito, de pedido de começo de jogo ao servidor
-    result = new_client(client_sock, request)
-    if (result['status'] == True) :
-        gamers.update(print_gamer()[client_id]) # atualizar o dicinário gamers local
-    #print(result) DEBUG
-    #print(print_gamer()) DEBUG
-    return result # contém o número secreto em print_gamer()
-
-# Testar a função new client do servidor SEM encriptação
-# Pré-requisitos: nenhum
-def test_new_client_non_encripted_2(client_sock, client_id) :
-    request = {'op': "START", 'client_id': client_id} # dicionário para pedir o começo de jogo ao servidor, sem o campo cipher
-    result = new_client(client_sock, request)
-    if (result['status'] == True) :
-        gamers.update(print_gamer()[client_id]) # atualizar o dicinário gamers local
-    #print(gamers) #DEBUG
-    #print(print_gamer()) DEBUG
-    return result
-
-# Testar a função new client do servidor COM encriptação
-# Pré-requisitos: nenhum
-def test_new_client_encripted(client_sock, client_id, key) :
-    chave = str (base64.b64encode (key), 'utf8') # guardar a chave (de modo codificado) no dicionário 
-    request = {'op': "START", 'client_id': client_id, 'cipher' : chave} # dicionário de defeito, de pedido de começo de jogo ao servidor
-    result = new_client(client_sock, request)
-    #print(result) DEBUG
-    #print(print_gamer()) DEBUG
-    return result
-
-# Testar a função de adivinhação do número secreto, SEM encriptação
-# Pré-requisitos: o cliente existir, bem como o dicionário gamers
-def test_guess_client_non_encripted(client_sock, number) :
-    request = {'op': "GUESS", 'number': number}
-    result = guess_client(client_sock, request)
-    assert result['status'] == True, "ERRO!: Ocorreu um erro na operação GUESS" # garantir que não houve um erro
-    return result
-
-# Testar a função de adivinhação do número secreto, COM encriptação
-# Pré-requisitos: o cliente existir, bem como o dicionário gamers
-def test_guess_client_encripted(client_sock, number) :
-    client_id = find_client_id(client_sock)
-    assert client_id != None
-    
-    request = {'op': "GUESS", 'number': encrypt_intvalue(client_id, number)}
-    result = guess_client(client_sock, request)
-    assert result['status'] == True, "ERRO!: Ocorreu um erro na operação GUESS" # garantir que não houve um erro
-    return result
-
-# Testar a função para parar o programa, SEM encriptação
-# Pré-requisitos: o cliente existir, bem como o dicionário gamers
-def test_stop_non_encripted(client_sock, number, attempts) :
-    client_id = find_client_id(client_sock)
-    assert client_id != None
-
-    request = {"op": "STOP", "number": number, "attempts": attempts}
-    result = stop_client(client_sock, request)
-    assert result['status'] == True, "ERRO!: Ocorreu um erro na operação STOP" # garantir que não houve um erro
-    return result
-
-# Testar a função para parar o programa, COM encriptação
-# Pré-requisitos: o cliente existir, bem como o dicionário gamers
-def test_stop_encripted(client_sock, number, attempts) :
-    client_id = find_client_id(client_sock)
-    assert client_id != None
-
-    request = {"op": "STOP", "number": encrypt_intvalue(client_id, number), "attempts": encrypt_intvalue(client_id, attempts)}
-    result = stop_client(client_sock, request)
-    assert result['status'] == True, "ERRO!: Ocorreu um erro na operação STOP" # garantir que não houve um erro
-    return result
-
-# Testar a funcionalidade de o cliente desistir
-# Pré-requisitos: o cliente e o dicionário gammers existirem
-def test_quit(client_sock) :
-    result = quit_client(client_sock, {"op": "QUIT"})
-    assert result['status'] == True, "ERRO!: Ocorreu um erro na operação QUIT" # garantir que não houve um erro
-    return result
+def test_encription() :
+    key = os.urandom(16) # chave de encriptação
+    write_gamer({'goncalo' : [{ 'socket': 'socket1', 'cipher' : key,
+		'guess' : 12, 'max_attempts' : 24, 'attempts' : 0 }]}) # criar um resultado no servidor
+    assert 29 == decrypt_intvalue('goncalo', encrypt_intvalue('goncalo', 29)) # garantir se o número fica o mesmo, depois de encriptar e desencriptar
+    clean_client('socket1') # apagar o resultado
 
 # Verificar que os dados foram acrescentados ao ficheiro
 def check_file(request):
@@ -107,36 +43,148 @@ def check_file(request):
     return False # valor por defeito
 
 # Testar a função update file
-# Pré-requisitos: nenhum
-def test_update_file(client_id, request) :
-    result = update_file(client_id, request) # Gravar o valor do request no ficheiro
+# Pré-requisitos: ficheiro criado
+def test_update_file() :
+    request = {'client_id' : 'teste', 'secret_number': 12, 'max_plays' : 13, 'current_plays' : 6, 'result' : "Middle"} # the values of request don't need to be real world valid tries
+    update_file("teste", request) # Gravar o valor do request no ficheiro
     assert check_file(request) # garantir que os dados foram gravados
 
+# Testar a função create file
+# Pré-requisitos: nenhum
 def test_create_file() :
     create_file()
-    assert os.path.exists("report.csv"), "ERRO!: ficheiro não existe"
+    assert os.path.exists("report.csv"), "ERRO!: ficheiro não existe" # garantir que o ficheiro foi criado
 
-def main() :
-    test_create_file()
-    test_update_file("teste", {'client_id' : 'teste', 'secret_number': 12, 'max_plays' : 13, 'current_plays' : 6, 'result' : "Middle"}) # the values of request don't need to be real world valid tries
+def test_clean_client() :
+    write_gamer({'ana' : [{ 'socket': 'socket10', 'cipher' : None,
+		'guess' : 12, 'max_attempts' : 24, 'attempts' : 0 }]}) # criar um resultado no servidor
+    assert clean_client('socket10'), "Cliente não existe"  # garantir que o resultado fica apagado
+
+# Testar a função new client do servidor SEM encriptação
+# Pré-requisitos: nenhum
+def test_new_client_non_encripted() :
+    request = {'op': "START", 'client_id': 'manel', 'cipher' : None} # dicionário de defeito, de pedido de começo de jogo ao servidor
+    result = new_client('socket2', request) #criar o cliente
+    assert result['status'], "Erro!: " + result['error']
+    assert find_client_id('socket2') != None, "O cliente não existe" # garantir que o cliente existe
+    #print(result) DEBUG
+    #print(print_gamer()) DEBUG
+    clean_client('socket2') # apagar o cliente
+
+# Testar a função new client do servidor SEM encriptação
+# Pré-requisitos: nenhum
+def test_new_client_non_encripted_2() :
+    request = {'op': "START", 'client_id': 'fernando'} # dicionário para pedir o começo de jogo ao servidor, sem o campo cipher
+    result = new_client('socket3', request) # criar o cliente
+    assert result['status'], "Erro!: " + result['error']
+    assert find_client_id('socket3') != None, "O cliente não existe" # garantir que existe um cliente
+    #print(gamers) #DEBUG
+    #print(print_gamer()) DEBUG
+    clean_client('socket3') # apagar o cliente
+
+# Testar a função new client do servidor COM encriptação
+# Pré-requisitos: nenhum
+def test_new_client_encripted() :
+    key = os.urandom(16) # gerar a chave
+    chave = str (base64.b64encode (key), 'utf8') # guardar a chave (de modo codificado) no dicionário 
+    request = {'op': "START", 'client_id': 'antonio', 'cipher' : chave} # dicionário de defeito, de pedido de começo de jogo ao servidor
+    result = new_client('socket4', request) # criar o cliente
+    assert result['status'], "Erro!: " + result['error']
+    assert find_client_id('socket4') != None, "O cliente não existe" # garantir que o cliente existe
+    #print(result) DEBUG
+    #print(print_gamer()) DEBUG
+    clean_client('socket4') # apagar o cliente
+
+# Testar a função de adivinhação do número secreto, SEM encriptação
+# Pré-requisitos: o cliente existir, bem como o dicionário gamers
+def test_guess_client_non_encripted() :
+    request = {'op': "START", 'client_id': 'goncalo1'} # dicionário para pedir o começo de jogo ao servidor, sem o campo cipher
+    result = new_client('socket11', request) # criar o cliente
+    assert result['status'], "Erro!: " + result['error']
+    assert find_client_id('socket11') != None, "O cliente não existe" # garantir que existe um cliente
+
+    request = {'op': "GUESS", 'number': 40} # criar o dicionário
+    result = guess_client('socket11', request) # enviar o dicionário
+    assert result['status'] == True, "ERRO!: Ocorreu um erro na operação GUESS" # garantir que não houve um erro
+    clean_client('socket11')  # apagar o cliente
+
+# Testar a função de adivinhação do número secreto, COM encriptação
+# Pré-requisitos: o cliente existir, bem como o dicionário gamers
+def test_guess_client_encripted() :
+    key = os.urandom(16)
+    chave = str (base64.b64encode (key), 'utf8') # guardar a chave (de modo codificado) no dicionário 
+    request = {'op': "START", 'client_id': 'antonio1', 'cipher' : chave} # dicionário de defeito, de pedido de começo de jogo ao servidor
+    result = new_client('socket12', request) # criar o cliente
+    assert result['status'], "Erro!: " + result['error']
+    assert find_client_id('socket12') != None, "O cliente não existe" # garantir que existe um cliente
     
-    test_create_file() # limpar os dados existentes no ficheiro
-    test_new_client_non_encripted("socket1", "goncalo")
-    assert test_find_client_id("socket1") != None # garantir que o cliente foi criado
-    print(print_client("goncalo"))
-    test_guess_client_non_encripted("socket1", 10)
+    request = {'op': "GUESS", 'number': encrypt_intvalue('antonio1', 40)} # criar o dicionário
+    result = guess_client('socket12', request) # enviar o dicionário
+    assert result['status'] == True, "ERRO!: Ocorreu um erro na operação GUESS" # garantir que não houve um erro
+    clean_client('12')  # apagar o cliente
 
-    assert test_new_client_non_encripted("socket2", "goncalo")['status'] == False, "Ocorreu um erro" # Este teste, tem de falhar
-    test_new_client_non_encripted("socket2", "francisco")
-    assert test_find_client_id("socket2") != None # garantir que o cliente foi criado
+# Testar a função para parar o programa, SEM encriptação
+# Pré-requisitos: o cliente existir, bem como o dicionário gamers
+def test_stop_non_encripted() :
+    request = {'op': "START", 'client_id': 'felizmino'} # dicionário de defeito, de pedido de começo de jogo ao servidor
+    result = new_client('socket5', request) # criar o cliente
+    assert result['status'], "Erro!: " + result['error']
+    assert find_client_id('socket5') != None, "O cliente não existe" # garantir que existe um cliente
 
-    test_new_client_encripted("socket3", "manuel", key = os.urandom(16))
-    assert test_find_client_id("socket3") != None # garantir que o cliente foi criado
+    request = {"op": "STOP", "number": 25, "attempts": 1} # criar o dicionário
+    result = stop_client('socket5', request) # enviar o dicionário
+    assert result['status'] == True or result['op'] == 'QUIT', "ERRO!: Ocorreu um erro na operação STOP" # garantir que não houve um erro
 
+# Testar a função para parar o programa, COM encriptação
+# Pré-requisitos: o cliente existir, bem como o dicionário gamers
+def test_stop_encripted() :
+    key = os.urandom(16)
+    chave = str (base64.b64encode (key), 'utf8') # guardar a chave (de modo codificado) no dicionário 
+    request = {'op': "START", 'client_id': 'agostinho', 'cipher' : chave} # dicionário de defeito, de pedido de começo de jogo ao servidor
+    result = new_client('socket6', request) # criar o cliente
+    assert result['status'], "Erro!: " + result['error']
+    assert find_client_id('socket6') != None, "O cliente não existe" # garantir que existe um cliente
+
+    request = {"op": "STOP", "number": encrypt_intvalue('agostinho', 20), "attempts": encrypt_intvalue('agostinho', 1)} # criar o dicionário
+    result = stop_client('socket6', request) # enviar o dicionário
+    assert result['status'] == True or result['op'] == 'QUIT', "ERRO!: Ocorreu um erro na operação STOP" # garantir que não houve um erro
+
+# Testar a funcionalidade de o cliente desistir
+# Pré-requisitos: o cliente e o dicionário gamers existirem
+def test_quit() :
+    request = {'op': "START", 'client_id': 'agostinho'} # dicionário para pedir o começo de jogo ao servidor, sem o campo cipher
+    result = new_client('socket6', request) # criar o cliente
+    assert find_client_id('socket6') != None, "O cliente não existe" # garantir que existe um cliente
+    assert result['status'], "Erro!: " + result['error']
+
+    result = quit_client('socket6', {"op": "QUIT"}) # enviar a operação
+    assert result['status'] == True, "ERRO!: Ocorreu um erro na operação QUIT" # garantir que não houve um erro
+
+# Teste da criação de dois cliente com o mesmo identificador
+# Pré-requisitos: nenhum
+def test_new_client_fail(): 
+    request = {'op': "START", 'client_id': 'mario', 'cipher' : None} # dicionário de defeito, de pedido de começo de jogo ao servidor
+    result = new_client('socket2', request) #criar o cliente
+    assert find_client_id('socket2') != None, "O cliente não existe" # garantir que o cliente existe
+    assert result['status'], "Erro!: " + result['error']
+
+    request = {'op': "START", 'client_id': 'mario', 'cipher' : None} # dicionário de defeito, de pedido de começo de jogo ao servidor
+    result = new_client('socket3', request) #criar o cliente
+    assert result['status'] == False, "Erro!: Verificação de clientes com o mesmo id não está a funcionar" # Tem de falhar
+
+    clean_client('socket2') # apagar o cliente
+    clean_client('socket3') # apagar o cliente
+
+# Teste do acesso às funções com argumentos errados
+def test_conditions() :
+    assert new_client('socket20', {'op': "START", 'batatas' : 3})['status'] == False, "Erro!" # Testar se forem enviadas condições erradas para a função new_client (Tem de falhar)
     
+    request = {'op': "START", 'client_id': 'maria', 'cipher' : None} # criar um novo cliente
+    result = new_client('socket2', request) #criar o cliente
+    assert find_client_id('socket2') != None, "O cliente não existe" # garantir que o cliente existe
+    assert result['status'], "Erro!: " + result['error']
+    assert guess_client('socket20', { 'op': 'GUESS', 'batatas' : 4})['status'] == False, "Erro!" # Testar se forem enviadas condições erradas para a função guess_client (Tem de falhar)
 
-    test_create_file() # limpar os dados existentes no ficheiro
-    # limpamos o ficheiro, pois é uma regra comum de no final de cada sessão de testes "deixar-mos" o sistema da mesma maneira que o encontrámos
-
-if __name__ == "__main__":
-	main()
+    # Testar se forem enviadas condições erradas para a função STOP_client
+    assert stop_client('socket20', {'op': 'STOP', 'batatas' : 'estragadas'})['status'] == False, "Erro!" # Tem de falhar
+    clean_client('socket20')# Função passada com sucesso

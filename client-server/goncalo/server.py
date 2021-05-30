@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-
+# -*- coding: utf-8 -*-
 import sys
 import socket
 import select
@@ -7,7 +7,7 @@ import json
 import base64
 import csv
 import random
-
+import os
 from Crypto import Cipher
 from common_comm import send_dict, recv_dict, sendrecv_dict
 
@@ -24,9 +24,13 @@ from Crypto.Cipher import AES
 gamers = {}
 
 # Código seguinte, usado apenas para testes
-def update_gamer(value) : # atualizar o gamers caso seje preciso
+def write_gamer(value) : # overwrite o gamers caso seje preciso
 	global gamers
 	gamers = value
+
+def update_gamer(value) : # atualizar o gamers caso seje preciso
+	global gamers
+	gamers.update(value)
 
 def print_gamer(): # mostrar o conteúdo do dicionário gamers
 	return gamers
