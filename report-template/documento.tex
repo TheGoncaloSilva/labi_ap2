@@ -268,20 +268,20 @@ sendo x "attempts"
 \end{figure}
 \section{Servidor}
 \label{sec:server}
-Nesta secção será apresentada e explicada a metodologia docódigo no ficheiro client.py
+Nesta secção será apresentada e explicada a metodologia do código no ficheiro server.py
 
 \subsection{Função main}
 \label{ssec:func_main}
 
-A função main é a função principal do cliente e é a primeira a ser executada quando o servidor é iniciado. Para iniciar o servidor, é usado o comando UNIX \textbf{'python3 server.py <número do porto>'}. Após o começo do programa, os argumentos de entrada serão validados, começando por verificar se existe um valor do porto e se este é inteiro e está entre 0 e 65535. De seguida o programa tenta iniciar o servidor com a porta fornecida. Se a porta fornecida pelo utilizador for reservada o programa avisa o utilizador e termina, similarmente, se a porta fornecida pelo utilizador já estiver a ser usada por um outro servidor a correr, o programa irá comunicar ao utilizador e terminar. 
+A função main é a função principal do cliente e é a primeira a ser executada quando o servidor é iniciado. Para iniciar o servidor, é usado o comando UNIX (ACRÓNIMO) \textbf{'python3 server.py <número do porto>'}. Após o começo do programa, os argumentos de entrada serão validados, começando por verificar se existe um valor do porto e se este é inteiro e está entre 0 e 65535. De seguida o programa tenta iniciar o servidor com a porta fornecida. Se a porta fornecida pelo utilizador for reservada o programa avisa o utilizador e termina, similarmente, se a porta fornecida pelo utilizador já estiver a ser usada por um outro servidor a correr, o programa irá comunicar ao utilizador e terminar. 
 
 Caso não exista nenhum erro nas condições acima, o servidor irá ser iniciado e criará o ficheiro de resultados dos jogadores "report.csv", bem como passará a ficar "à escuta" de conecções dos clientes.
 
-Com o servidor a funcionar, este vai ficar à espera de conecções de clientes. Quando um cliente tentar se conectar, o servidor irá obter os valores do seu socket e verificar se já existe algum cliente na lista com os mesmos valores, se não existir, então irá adicioná-lo à lista.
+Com o servidor a funcionar, este vai ficar à espera de conexões de clientes. Quando um cliente tentar se conectar, o servidor irá obter os valores do seu socket e verificar se já existe algum cliente na lista com os mesmos valores, se não existir, então irá adicioná-lo à lista.
 
-Tendo o cliente estabelecido a conecção com sucesso, este irá comunicar com o servidor através de pedidos. Esses pedidos são "ouvidos" pelo servidor e comunicados à \nameref{ssec:func_new_msg} que os irá processar.
+Tendo o cliente estabelecido a conexão com sucesso, este irá comunicar com o servidor através de pedidos. Esses pedidos são "ouvidos" pelo servidor e comunicados à \nameref{ssec:func_new_msg} que os irá processar.
 
-Finalmente, como estão a ser usados sockets TCP \ac{tcp}, estes "sentem" se alguma exceção aconteceu e se o cliente se desconectou do servidor, caso isso aconteça, o servidor irá remover este cliente da lista de clientes, executar a \nameref{ssec:func_clean_client} e fechar o socket do cliente.
+Finalmente, como estão a ser usados sockets TCP (ACRÓNIMO), estes "sentem" se alguma exceção aconteceu e se o cliente se desconectou do servidor, caso isso aconteça, o servidor irá remover este cliente da lista de clientes, executar a \nameref{ssec:func_clean_client} e fechar o socket do cliente.
 
 \subsection{Função find\_client\_id}
 \label{ssec:func_find_client_id}
@@ -291,12 +291,12 @@ A função find\_client\_id aceita como parâmetros o socket do cliente e procur
 \subsection{Função encrypt\_intvalue}
 \label{ssec:func_encrypt_value_server}
 
-O objetivo desta função é encriptar um valor inteiro, para tal, aceita como parâmetros o id do cliente e um valor inteiro, devolvendo uma palavra (String) codificada que representa esse valor. De seguida, é usada a chave previamente guardada no dicionário associada ao id do cliente e criada uma cifra do tipo AES-128 \ac{aes}. Esta crifa criada, será usada para encriptar o número em forma de bytes do tipo 'utf8'. Por final, convertemos os bytes que obtivemos no passo anterior para texto (String) usando a função \textbf{base64.b64encode} \ac{base64}.
+O objetivo desta função é encriptar um valor inteiro, para tal, aceita como parâmetros o id do cliente e um valor inteiro, devolvendo uma palavra (String) codificada que representa esse valor. De seguida, é usada a chave previamente guardada no dicionário associada ao id do cliente e criada uma cifra do tipo AES-128 (ACRONIMO). Esta crifa criada, será usada para encriptar o número em forma de bytes do tipo 'utf8'. Por final, convertemos os bytes que obtivemos no passo anterior para texto (String) usando a função \textbf{base64.b64encode} (Acrónimo).
 
 \subsection{Função decrypt\_intvalue}
 \label{ssec:func_decrypt_value_server}
 
-O funcionamento desta função é próximo ao da \nameref{ssec:func_encrypt_value_server}, tendo apenas o funcionamento oposto. Para desencriptar os números, a função aceita como parâmetros o id do cliente e um texto (String). Começa por criar a chave de encriptação do tipo AES-128 \ac{aes} e de seguida converte o texto que recebemos em bytes usando a função \textbf{base64.b64decode} \ac{base64}. Tendo obtido o valor em bytes, procede à desencriptação usando a cifra criada anteriormente. Por fim, converte os valores bytes obtidos em uma String desencriptada, convertendo essa String para inteiro e devolvendo-a.
+O funcionamento desta função é próximo ao da \nameref{ssec:func_encrypt_value_server}, tendo apenas o funcionamento oposto. Para desencriptar os números, a função aceita como parâmetros o id do cliente e um texto (String). Começa por criar a chave de encriptação do tipo AES-128 (ACRONIMO) e de seguida converte o texto que recebemos em bytes usando a função \textbf{base64.b64decode} (Acrónimo). Tendo obtido o valor em bytes, procede à desencriptação usando a cifra criada anteriormente. Por fim, converte os valores bytes obtidos em uma String desencriptada, convertendo essa String para inteiro e devolvendo-a.
 
 \begin{figure}[!h]
 \center
@@ -315,7 +315,7 @@ Se o cliente enviou um pedido corretamente formulado ao servidor, este pode proc
 \item \textbf{'GUESS'} - Processar a adivinha do jogador (\nameref{ssec:func_guess_client})
 \item \textbf{'STOP'} - Processar o término do jogo (\nameref{ssec:func_stop_client})
 \end{itemize}
-Cada uma destas operações devolve uma resposta para ser enviada ao cliente, dependendo da operação e do seu sucesso. Por fim, tendo processado a resposta ao pedido do cliente, a função o seu resultado ao cliente. 
+Cada uma destas operações devolve uma resposta para ser enviada ao cliente, dependendo da operação e do seu sucesso. Por fim, tendo processado a resposta ao pedido do cliente, a função devolve o seu resultado ao cliente. 
 
 \begin{figure}[!h]
 \center
@@ -325,11 +325,11 @@ Cada uma destas operações devolve uma resposta para ser enviada ao cliente, de
 \subsection{Função new\_client}
 \label{ssec:func_new_client}
 
-A função new\_client processa o pedido de começo de jogo do cliente, devolvendo um dicionário com o número máximo de tentativas, cajo seja processada com sucesso. Se a função não for processada com sucesso, significa que o cliente não está inscrito como como jogador ativo. A função aceita como parâmetros de entrada o socket do cliente e o pedido do jogador.
+A função new\_client processa o pedido de começo de jogo do cliente, devolvendo um dicionário com o número máximo de tentativas, cajo seja processada com sucesso. Se a função não for processada com sucesso, significa que o cliente não está inscrito como jogador ativo. A função aceita como parâmetros de entrada o socket do cliente e o pedido do jogador.
 
 Além das verificação faladas acima, a função também verifica se o jogador enviou os campos necessários para efetuar o pedido, nomeadamente o campo "client\_id".
 
-Se o formato do pedido estiver correto e o cliente existir, a função irá gerar o número secreto para o jogador adivinhar e o número máximo de jogadas. De seguida adicionará o cliente à lista de jogadores ativos e terá em conta se foi escolhido encriptação, tomando as ações necessárias para encriptar os dados. recorrendo à função  \nameref{ssec:func_encrypt_value_server}.
+Se o formato do pedido estiver correto e o cliente existir, a função irá gerar o número secreto para o jogador adivinhar e o número máximo de jogadas. De seguida adicionará o cliente à lista de jogadores ativos e terá em conta se foi escolhido encriptação, tomando as ações necessárias para encriptar os dados recorrendo à função  \nameref{ssec:func_encrypt_value_server}.
 
 \begin{figure}[!h]
 \center
@@ -339,7 +339,7 @@ Se o formato do pedido estiver correto e o cliente existir, a função irá gera
 \subsection{Função clean\_client}
 \label{ssec:func_clean_client}
 
-Esta função tem como objetivo, eliminar o cliente da lista de jogadores ativos, para isso, aceita como parâmetro o socket do cliente e procura o id do mesmo. Se o o id não existir, significa que o cliente não está registado, retornando "False". Caso esteje registado, então apaga-o do dicionário de jogadores ativos e devolve "True".
+Esta função tem como objetivo, eliminar o cliente da lista de jogadores ativos. Para isso, aceita como parâmetro o socket do cliente e procura o id do mesmo. Se o o id não existir, significa que o cliente não está registado, retornando "False". Caso esteja registado, então apaga-o do dicionário de jogadores ativos e devolve "True".
 
 \begin{figure}[!h]
 \center
@@ -349,16 +349,16 @@ Esta função tem como objetivo, eliminar o cliente da lista de jogadores ativos
 \subsection{Função quit\_client}
 \label{ssec:func_quit_client}
 
-A função quit\_client processa a operação de desistência do jogo, tendo como pré-requisito a existência de o cliente na lista de jogadores ativos e o formato de pedido de operação correto.
+A função quit\_client processa a operação de desistência do jogo, tendo como pré-requisito a existência do cliente na lista de jogadores ativos e o formato de pedido de operação correto.
 
-Tendo estas condições sido verificadas, o servidor irá processar a desisência do cliente, recorrendo à \nameref{ssec:func_update_file} para atualizar os dados do cliente e à \nameref{ssec:func_clean_client} para remover o cliente da lista de jogadores ativos.
+Tendo estas condições sido verificadas, o servidor irá processar a desistência do cliente, recorrendo à \nameref{ssec:func_update_file} para atualizar os dados do cliente e à \nameref{ssec:func_clean_client} para remover o cliente da lista de jogadores ativos.
 
 Se o pedido tiver sido processado corretamente, a função retornará o sucesso da mesma, caso contrário devolverá o erro sucedido.
 
 \subsection{Função create\_file}
 \label{ssec:func_create_file}
 
-Esta função é usada para criar o ficheiro "Report.csv" que posteriormente será usado para guardar os resultados dos jogos dos cliente, quando estes o terminam.
+Esta função é usada para criar o ficheiro "Report.csv", que posteriormente será usado para guardar os resultados dos jogos dos cliente quando estes o terminam.
 
 \subsection{Função update\_file}
 \label{ssec:func_update_file}
@@ -379,7 +379,7 @@ Para o cliente efetuar uma tentativa do número secreto, é usada a função gue
 
 Antes de efetuar a operação de guess, a função verifica se existe um jogador ativo com o socket fornecido e se o campo "number" foi fornecido no pedido do cliente.
 
-Se as condições anteriores forem verificadas, o servidor contará uma tentativa realizada e caso o cliente tenha escolhido encriptação de dados, irá desencriptar o campo "number", recorrendo à \nameref{ssec:func_decrypt_value_server}. Após ter o valor da tentativa, o servidor irá comparar o número da tentativa com o número secreto que tem armazenado e irá devolver um dos três resultados:
+Se as condições anteriores forem verificadas, o servidor contará uma tentativa realizada e, caso o cliente tenha escolhido encriptação de dados, irá desencriptar o campo "number" recorrendo à \nameref{ssec:func_decrypt_value_server}. Após ter o valor da tentativa, o servidor irá comparar o número da tentativa com o número secreto que tem armazenado e irá devolver um dos três resultados:
 \begin{itemize}
 \item \textbf{'larger'} - Se o cliente escolheu um número inferior ao número secreto;
 \item \textbf{'smaller'} - Se o cliente escolheu escolheu um número superior ao número secreto;
@@ -391,13 +391,37 @@ Se as condições anteriores forem verificadas, o servidor contará uma tentativ
 
 A função stop\_client processa o término do jogo. Aceita como parâmetros de entrada, o socket do cliente e o pedido do cliente.
 
-Para processar a operação, a função garante que existe um jogador ativo, com o socket fornecido, usando a  \nameref{ssec:func_find_client_id} e se os campo "attempts" e "number" foram fornecido no pedido do cliente. Além disso, a função também levará em conta se estes campos fornecidos estão encriptados, se estivrem, irá utilizar a \nameref{ssec:func_decrypt_value_server} para proceder à desencriptação.
+Para processar a operação, a função garante que existe um jogador ativo, com o socket fornecido, usando a  \nameref{ssec:func_find_client_id} e se os campos "attempts" e "number" foram fornecidos no pedido do cliente. Além disso, a função também levará em conta se estes campos estão encriptados. Se estiverem, irá utilizar a \nameref{ssec:func_decrypt_value_server} para proceder à desencriptação.
 
 Caso as condições anteriores se verifiquem, o servidor vai dar inicio ao processamento do término do jogo. Se o cliente \textbf{não} tiver enviado um número correto de tentativas ou exceder o número máximo de tentativas, o servidor vai enviar a mensagem de \textbf{erro} "Número de jogadas inconsistente". Caso contrário, verifica se o cliente acertou o jogo. Se o cliente tiver acertado o número secreto, envia dicionário com o número secreto para o utilizador e guarda que o cliente acertou, caso contrário, envia também o dicionário para o cliente, mas guarda que o cliente falhou o número secreto.
 
-Após as verificações anteriores, o servidor irá atualizar o ficheiro 'report.csv' usando a \nameref{ssec:func_update_file} escolhendo o campo "Result" como "SUCCESS" ou "FAILURE", se o jogador acertou ou falhou o número secreto ou apresenta um número de jogadas inconsistente, respetivamente.
+Após as verificações anteriores, o servidor irá atualizar o ficheiro 'report.csv' usando a \nameref{ssec:func_update_file} escolhendo o campo "Result" como "SUCCESS" ou "FAILURE", dependendo se o jogador acertou ou falhou o número secreto ou apresenta um número de jogadas inconsistente, respetivamente.
 
 Por fim, o servidor desvincula o client, recorrendo à \nameref{ssec:func_clean_client} e remove o cliente da lista de jogadores ativos.
+
+\begin{figure}[!h]
+\center
+\includegraphics[height = 200pt]{img/stopclient.png}
+\end{figure}
+
+\section{Git}
+\label{sec:git}
+As funcionalidades do git foram muito utilizados neste projeto, desde a simples sincronização de ficheiros e código, até à criação, junção e gestão de branches (\textbf{\autoref{fig:git}}). 
+\cite{git}
+
+\begin{figure}[!h]
+\center 
+\includegraphics[height=220pt]{img/otherFunctions_Branch_deletion.png}
+\caption{Exemplo da eliminação de branches (eliminação branch otherFunctions)}
+\label{fig:git}
+\end{figure}
+
+\section{Code UA}
+\label{sec:git}
+As funcionalidades do Code UA forneceram bastante ajuda ao desenvolvimento do projeto, desde a própria visualização dos branches disponíveis, bem como a própria gestão e visualização do código, até à criação de funcionalidades a serem desenvolvidas e bugs a serem resolvidos. Pode visualizar o projeto no Code UA, através do link: http://code.ua.pt/projects/labi2021-ap2-g29
+\cite{codeua}
+
+
 
 \begin{figure}[!h]
 \center
@@ -429,12 +453,12 @@ Descreve os resultados obtidos.
 
 \section{Wireshark}
 \label{sec:wireshark}
-Nesta secção iremos mostrar a diferença, em termos de segurança, entre utilizar encriptação na ligação, contra não utilizar encriptação. É relevante de salientar que o jogo suporta encriptação apenas para os números trocados entre o cliente e o servidor.
+Nesta secção iremos mostrar a diferença, em termos de segurança, entre utilizar e não utilizar encriptação na ligação. É importante salientar que o jogo suporta encriptação apenas para os números trocados entre o cliente e o servidor.
 
 \subsection{Sem encriptação}
 \label{ssec:wireshark_decrypt}
 
-Na \autoref{fig:client_start} o cliente começou o servidor com o modo sem encriptação e como consequência, os seus dados não irão ser encriptados.
+Na \autoref{fig:client_start} o cliente começou o servidor com o modo sem encriptação e como consequência, os seus dados não serão encriptados.
 
 \begin{figure}[!h]
 \center 
@@ -481,7 +505,7 @@ Na \autoref{fig:wireshark_start_response} podemos observar que o programa conseg
 
 Como vimos nas imagens anteriores, o tipo de comunicação sem encriptação de dados com o servidor acarreta uma grave falha de segurança e só deve ser usado em último caso e entre redes seguras. Usando este tipo de comunicação, qualquer pessoa que esteje a correr um programa de interseção de dados, pode ter acesso a toda a informação que transmitimos, revelando-se um grande problema quando estivermos a transmitir dados sensíveis.
 
-De forma a combater esta vulnerabilidade, foi implementada a função de encriptação de dados que está explicada a seguir (\nameref{ssec:wireshark_encrypt}).
+De forma a combater esta vulnerabilidade, foi implementada a função de encriptação de dados que está explicada a seguir. (\nameref{ssec:wireshark_encrypt}).
 
 \subsection{Com encriptação}
 \label{ssec:wireshark_encrypt}
@@ -522,7 +546,7 @@ A \autoref{fig:wireshark_start_request_enc} mostra-nos que o programa Wireshark 
 \label{fig:wireshark_start_request_enc}
 \end{figure}
 
-Na \autoref{fig:wireshark_start_response_enc} podemos observar que o programa conseguiu captar com sucesso a resposta do servidor e pode ter acesso a toda a informação da mesma, no entanto não consegue saber qual é o valor da resposta, pois esta se encontra encriptada.
+Na \autoref{fig:wireshark_start_response_enc} podemos observar que o programa conseguiu captar com sucesso a resposta do servidor e pode ter acesso a toda a informação da mesma, no entanto não consegue saber qual é o valor da resposta pois esta se encontra encriptada.
 
 \begin{figure}[!h]
 \center 
@@ -531,7 +555,7 @@ Na \autoref{fig:wireshark_start_response_enc} podemos observar que o programa co
 \label{fig:wireshark_start_response_enc}
 \end{figure}
 
-Como vimos nas imagens anteriores, o tipo de comunicação com encriptação de dados é imensamente superior à conecção convencional sem encriptação.
+Como vimos nas imagens anteriores, o tipo de comunicação com encriptação de dados é imensamente superior à conexão convencional sem encriptação.
 
 
 \chapter{Conclusões}
@@ -562,9 +586,8 @@ No fim indicar a percentagem de contribuição de cada autor.
 \acro{base64}[Base64]{Base64 (forma de codificar octetos arbitrários como caracteres)}
 \acro{tcp}[TCP]{Transmission Control Protocol}
 \end{acronym}
-
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \printbibliography
 
 \end{document}
