@@ -318,17 +318,17 @@ def main(argv):
 	# verify type of of arguments and eventually print error message and exit with error
 	if (len(argv) <= 1) : # se os argumentos não forem os suficientes
 		print("Porto de acesso precisa de ser especificado")
-		exit(1) # fechar o programa
+		exit(4) # fechar o programa
 
 	try : # testar se o valor é um número
 		port = int(argv[1])
 	except :
 		print("O valor do porto de acesso precisa de ser um número")
-		exit(3)
+		exit(4)
 
 	if (port <= 0 or port > 65535 ) : # testar o valor do porto e verificar a condição
 		print("Valor do porto tem de ser superior a 0 e inferior a 65535")
-		exit(2)
+		exit(4)
 
 	server_socket = socket.socket (socket.AF_INET, socket.SOCK_STREAM)
 	try: # tentar a conecção
@@ -339,7 +339,7 @@ def main(argv):
 		exit(4)
 	except OSError: # se o servidor já estiver a correr
 		print("ERRO : O servidor já está a correr")
-		exit(5)
+		exit(4)
 
 
 	clients = []
