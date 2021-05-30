@@ -446,7 +446,100 @@ As funcionalidades do Code UA forneceram bastante ajuda ao desenvolvimento proje
 
 \chapter{Resultados}
 \label{chap.resultados}
-Descreve os resultados obtidos.
+
+Neste capítulo é abordado o funcionamento e interação do cliente com o servior, bem como os testes executados.
+
+\section{Funcionamento}
+\label{sec:funcionamento}
+
+A \autoref{fig:iniciar_server} mostra o comando de inicio do servidor.
+
+\begin{figure}[!h]
+\center 
+\includegraphics[height=40pt]{img/fotos_resultado/iniciar_server.png}
+\caption{Iniciar Servidor}
+\label{fig:iniciar_server}
+\end{figure}
+
+Após o servidor estar a funcionar, podemos aceder ao mesmo com o cliente,  \autoref{fig:iniciar_cliente}. Após a conexão ser estabelecida o prompt irá perguntar se pretende encriptar a ligação ou não. Basta selecionar a opção que pretender-mos e continuar.
+
+\begin{figure}[!h]
+\center 
+\includegraphics[height=55pt]{img/fotos_resultado/iniciar_client.png}
+\caption{Iniciar Cliente}
+\label{fig:iniciar_cliente}
+\end{figure}
+
+A \autoref{fig:menu} apresenta as operações que o jogador pode escolher, bem como as suas tentativas restantes.
+
+\begin{figure}[!h]
+\center 
+\includegraphics[height=170pt]{img/fotos_resultado/menu.png}
+\caption{Operações disponíveis}
+\label{fig:menu}
+\end{figure}
+
+Na \autoref{fig:secret_n_client} o cliente escolheu adivinhar o número secreto, para isso, introduziu o número correspondente à operação e de seguida o número secreto.
+
+\begin{figure}[!h]
+\center 
+\includegraphics[height=170pt]{img/fotos_resultado/guess_client.png}
+\caption{Adivinhar número, cliente}
+\label{fig:secret_n_client}
+\end{figure}
+
+Do lado do servidor, este recebeu o pedido do cliente (\autoref{fig:secret_n_server}) e passará a processá-lo.
+
+\begin{figure}[!h]
+\center 
+\includegraphics[height=100pt]{img/fotos_resultado/guess_server.png}
+\caption{Adivinhar número, servidor}
+\label{fig:secret_n_server}
+\end{figure}
+
+Após o pedido ser processado, o servidor enviará um resultado para o cliente no formato de uma "DICA" indicando se o número secreto é superior, inferior ou se acertou (\autoref{fig:secret_n_client}).
+
+Se o cliente acertar o número secreto, o programa irá indicar ao cliente que acertou o número secreto e terminar.
+
+\begin{figure}[!h]
+\center 
+\includegraphics[height=200pt]{img/fotos_resultado/acertar_num_secret.png}
+\caption{Acertar número secreto}
+\label{fig:secret_n_acertar}
+\end{figure}
+
+Se o cliente estiver registado, e quiser desistir de jogar, pode indicar essa intenção na respetiva operação do menu e o jogo irá terminar (\autoref{fig:quit_playing})
+
+\begin{figure}[!h]
+\center 
+\includegraphics[height=200pt]{img/fotos_resultado/quit_client.png}
+\caption{Desistir de jogar}
+\label{fig:quit_playing}
+\end{figure}
+
+Se o cliente estiver registado, e quiser terminar o jogo, pode indicar essa intenção na respetiva operação do menu e o jogo irá terminar, indicando ao cliente se foi vencedor ou não (\autoref{fig:stop_playing})
+
+\begin{figure}[!h]
+\center 
+\includegraphics[height=200pt]{img/fotos_resultado/stop_client.png}
+\caption{Terminar o jogo}
+\label{fig:stop_playing}
+\end{figure}
+
+\section{Testes}
+\label{sec:testes}
+
+Os testes à aplicação foram feitos através de testes funcionais e unitários criados para o efeito. Estes testes são corridos usando a ferramenta pytest incorporada no python. Os testes albergam três ficheiros, o ficheiro test\_client.py, testa o cliente, o ficheiro test\_server.py, testa o servidor e o ficheiro test\_func testa ambos os ficheiros.
+
+É possível correr estes testes através do comando \textbf{"python3 -m pytest"}, como nos mostra a 
+
+\begin{figure}[ht]
+\center 
+\includegraphics[height=400pt]{img/fotos_resultado/testes.png}
+\caption{Testes Unitários e Funcionais do cliente e servidor}
+\label{fig:stop_playing}
+\end{figure}
+
 
 \chapter{Análise}
 \label{chap.analise}
