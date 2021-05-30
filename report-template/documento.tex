@@ -118,8 +118,10 @@ quão interessante foi realizá-lo.
 % Segundo glisc deveria aparecer após conclusão...
 \renewcommand{\abstractname}{Agradecimentos}
 \begin{abstract}
-Eventuais agradecimentos.
-Comentar bloco caso não existam agradecimentos a fazer.
+Queremos agradecer a todos os professores da cadeira de LABI por nos terem dado um trabalho interessante, que nos ajudou a
+compreender os conceitos lecionados nas aulas. Queremos também agradecer a Guido van Rossum por ter criado a linguagem Python
+e ao Bill Gates por ter sido um dos grandes pilares para a criação de portáteis.
+
 \end{abstract}
 
 
@@ -179,16 +181,9 @@ do método ".split('.')" e, caso algum não satisfaça a condição, é enviada 
 Após esta verificação, é criado o socket com a porta e máquina indicados na invocação, tenta-se estabelecer conexão e chama-se a 
 função run\_client, que é onde se vai passar o jogo. Quando terminar, é fechado o socket e o cliente termina.
 
-\begin{lstlisting}
-
-
-
-
-
-
-\end{lstlisting}
 
 \subsection{Função run\_client}
+
 \label{ssec:runclient}
 A função run\_client é invocada na main. O cliente é introduzido ao jogo e é-lhe questionado se pretende encriptação
 de dados (S/N). Enquanto a respotas for diferente dessas duas letras, é enviada uma mensagem de erro. Após a inserção da
@@ -199,6 +194,12 @@ se houve termina, senão a variável maxAttempts fica com o valor correspondente
 , onde o cliente pode escolher o que fazer. É verificado se o que o cliente inseriu é um número ou não através de um try/except
 , onde caso não seja inserido um número, a opção fica com o valor 999 por defeito pois no final da run\_client, essa operação é
  reconhecida como desconhecida e é relatado. Se a opção inserida for 1, é iniciada a operação start, como indicada no menu. 
+ 
+ \begin{figure}[!h]
+\center
+\includegraphics[height = 180pt]{img/run1.png}
+\end{figure}
+
 \subsubsection{Opção 1}
 \label{sssec:first}
 
@@ -209,6 +210,15 @@ e é enviado para o servidor, recebendo ao mesmo tempo a resposta através de se
 é validada (validate\_response) e a tentativa é registada em tries. Se o jogador acertou no número, é dito ao cliente e é redirecionado
 para a opção 2, se foi maior ou menor ("smaller"/"larger") é também escrito no ecrã esse resultado. Se o número de tentativas
 exceder o máximo estipulado pelo servidor, é dito ao cliente e este é redirecionado para a opção 2.
+
+\begin{figure}[!h]
+\center
+\includegraphics[height = 180pt]{img/option1.png}
+\end{figure}
+\begin{figure}[!h]
+\center
+\includegraphics[height = 67pt]{img/opt1sec.png}
+\end{figure}
 \subsubsection{Opção 2}
 \label{sssec:second}
 
@@ -220,19 +230,29 @@ o jogador excedeu o número de jogadas e perdeu o jogo, é dito ao cliente isso 
 e o número secreto, que está na chave 'guess' de recvstop é armazenada em returnGuess, que é desencriptado se houver encriptação.
 Se a última tentativa do jogador for igual ao número secreto, o jogador acertou e ganhou o jogo, senão perdeu. Em ambos os casos
 o cliente é informado do seu resultado e sai do jogo.
+
 \subsubsection{Opção 3}
 \label{sssec:third}
 Na opção 3, o jogador é enviado para a função quit\_action, onde é sistematizada toda a operação esta operação. O output da função
 é armazenado em condition. Se condition tiver o valor None, não houve erro e o cliente sai do jogo. Caso contrário, o erro é
 dito ao cliente e este sai do jogo.
 
-\paragraph{}
 No fim de todo este código, encontra-se a condição que é executada se o número da operação inserida pelo cliente for inválido. Nessa situação, o cliente é informado deste problema e, visto que tudo isto se encontra dentro de um ciclo "while True", o jogador volta ao menu para escolher outra opção.
+
+\begin{figure}[!h]
+\center
+\includegraphics[height = 75pt]{img/option3.png}
+\end{figure}
 \subsection{Função validate\_response}
 \label{ssec:validate}
 A função validate\_response procura por uma chave "error" no dicionário response, que corresponde à resposta de um servidor
 ao que foi enviado pelo cliente. Visto que, quando existe um erro, seja qual for a operação, esta chave é enviada, é feita essa
 procura e, se existir, é enviado um valor booleano True, caso contrário é enviado False
+
+\begin{figure}[!h]
+\center
+\includegraphics[height = 180pt]{img/cryptovalidate.png}
+\end{figure}
 
 \subsection{Função quit\_operation}
 \label{ssec:quit}
@@ -241,6 +261,11 @@ para receber a resposta do servidor ao enviar quit através de sendrecv\_dict. S
 um erro, é enviado o return da chave do erro. Se não houver erro, o cliente é informado que desistiu depois de x tentativas,
 sendo x "attempts"
 
+
+\begin{figure}[!h]
+\center
+\includegraphics[height = 77pt]{img/quit.png}
+\end{figure}
 \section{Servidor}
 \label{sec:server}
 Nesta secção será apresentada e explicada a metodologia docódigo no ficheiro client.py
@@ -258,7 +283,6 @@ Tendo o cliente estabelecido a conecção com sucesso, este irá comunicar com o
 
 Finalmente, como estão a ser usados sockets TCP (ACRÓNIMO), estes "sentem" se alguma exceção aconteceu e se o cliente se desconectou do servidor, caso isso aconteça, o servidor irá remover este cliente da lista de clientes, executar a \nameref{ssec:func_clean_client} e fechar o socket do cliente.
 
-
 \subsection{Função find\_client\_id}
 \label{ssec:func_find_client_id}
 
@@ -274,6 +298,11 @@ O objetivo desta função é encriptar um valor inteiro, para tal, aceita como p
 
 O funcionamento desta função é próximo ao da \nameref{ssec:func_encrypt_value_server}, tendo apenas o funcionamento oposto. Para desencriptar os números, a função aceita como parâmetros o id do cliente e um texto (String). Começa por criar a chave de encriptação do tipo AES-128 (ACRONIMO) e de seguida converte o texto que recebemos em bytes usando a função \textbf{base64.b64decode} (Acrónimo). Tendo obtido o valor em bytes, procede à desencriptação usando a cifra criada anteriormente. Por fim, converte os valores bytes obtidos em uma String desencriptada, convertendo essa String para inteiro e devolvendo-a.
 
+\begin{figure}[!h]
+\center
+\includegraphics[height = 180pt]{img/cryptofindid.png}
+\end{figure}
+
 \subsection{Função new\_msg}
 \label{ssec:func_new_msg}
 
@@ -288,6 +317,11 @@ Se o cliente enviou um pedido corretamente formulado ao servidor, este pode proc
 \end{itemize}
 Cada uma destas operações devolve uma resposta para ser enviada ao cliente, dependendo da operação e do seu sucesso. Por fim, tendo processado a resposta ao pedido do cliente, a função o seu resultado ao cliente. 
 
+\begin{figure}[!h]
+\center
+\includegraphics[height = 180pt]{img/newmsg.png}
+\end{figure}
+
 \subsection{Função new\_client}
 \label{ssec:func_new_client}
 
@@ -297,10 +331,20 @@ Além das verificação faladas acima, a função também verifica se o jogador 
 
 Se o formato do pedido estiver correto e o cliente existir, a função irá gerar o número secreto para o jogador adivinhar e o número máximo de jogadas. De seguida adicionará o cliente à lista de jogadores ativos e terá em conta se foi escolhido encriptação, tomando as ações necessárias para encriptar os dados. recorrendo à função  \nameref{ssec:func_encrypt_value_server}.
 
+\begin{figure}[!h]
+\center
+\includegraphics[height = 180pt]{img/newclient.png}
+\end{figure}
+
 \subsection{Função clean\_client}
 \label{ssec:func_clean_client}
 
 Esta função tem como objetivo, eliminar o cliente da lista de jogadores ativos, para isso, aceita como parâmetro o socket do cliente e procura o id do mesmo. Se o o id não existir, significa que o cliente não está registado, retornando "False". Caso esteje registado, então apaga-o do dicionário de jogadores ativos e devolve "True".
+
+\begin{figure}[!h]
+\center
+\includegraphics[height = 53pt]{img/cleanclient.png}
+\end{figure}
 
 \subsection{Função quit\_client}
 \label{ssec:func_quit_client}
@@ -322,6 +366,11 @@ Esta função é usada para criar o ficheiro "Report.csv" que posteriormente ser
 A função update\_file é usada para atualizar o ficheiro "Report.csv" com os resultados dos jogos dos clientes. Tem como parâmetros o id do cliente e o a linha de dados para serem acrescentados.
 
 A função abre o ficheiro em modo de append, para não sobrescrever os dados, mas sim para acrescentar mais uma linha com resultados ao ficheiro.
+
+\begin{figure}[!h]
+\center
+\includegraphics[height = 110pt]{img/createupdate.png}
+\end{figure}
 
 \subsection{Função guess\_client}
 \label{ssec:func_guess_client}
@@ -350,6 +399,10 @@ Após as verificações anteriores, o servidor irá atualizar o ficheiro 'report
 
 Por fim, o servidor desvincula o client, recorrendo à \nameref{ssec:func_clean_client} e remove o cliente da lista de jogadores ativos.
 
+\begin{figure}[!h]
+\center
+\includegraphics[height = 200pt]{img/stopclient.png}
+\end{figure}
 
 \section{Git}
 \label{sec:git}
