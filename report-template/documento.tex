@@ -41,10 +41,10 @@
 % Definições
 %
 \def\titulo{Adivinha o Número Secreto}
-\def\data{DATA}
+\def\data{30/05/2021}
 \def\autores{Gonçalo Silva, Samuel Teixeira}
-\def\autorescontactos{(103) goncalol@ua.pt, (103325) steixeira@ua.pt}
-\def\versao{VERSAO 1.0}
+\def\autorescontactos{(103244) goncalolsilva@ua.pt, (103325) steixeira@ua.pt}
+\def\versao{VERSAO FINAL}
 \def\departamento{Departamento de Eletrónica, Telecomunicações e Informática}
 \def\empresa{Universidade de Aveiro}
 \def\logotipo{ua.pdf}
@@ -273,7 +273,7 @@ Nesta secção será apresentada e explicada a metodologia docódigo no ficheiro
 \subsection{Função main}
 \label{ssec:func_main}
 
-A função main é a função principal do cliente e é a primeira a ser executada quando o servidor é iniciado. Para iniciar o servidor, é usado o comando UNIX (ACRÓNIMO) \textbf{'python3 server.py <número do porto>'}. Após o começo do programa, os argumentos de entrada serão validados, começando por verificar se existe um valor do porto e se este é inteiro e está entre 0 e 65535. De seguida o programa tenta iniciar o servidor com a porta fornecida. Se a porta fornecida pelo utilizador for reservada o programa avisa o utilizador e termina, similarmente, se a porta fornecida pelo utilizador já estiver a ser usada por um outro servidor a correr, o programa irá comunicar ao utilizador e terminar. 
+A função main é a função principal do cliente e é a primeira a ser executada quando o servidor é iniciado. Para iniciar o servidor, é usado o comando UNIX \textbf{'python3 server.py <número do porto>'}. Após o começo do programa, os argumentos de entrada serão validados, começando por verificar se existe um valor do porto e se este é inteiro e está entre 0 e 65535. De seguida o programa tenta iniciar o servidor com a porta fornecida. Se a porta fornecida pelo utilizador for reservada o programa avisa o utilizador e termina, similarmente, se a porta fornecida pelo utilizador já estiver a ser usada por um outro servidor a correr, o programa irá comunicar ao utilizador e terminar. 
 
 Caso não exista nenhum erro nas condições acima, o servidor irá ser iniciado e criará o ficheiro de resultados dos jogadores "report.csv", bem como passará a ficar "à escuta" de conecções dos clientes.
 
@@ -281,7 +281,7 @@ Com o servidor a funcionar, este vai ficar à espera de conecções de clientes.
 
 Tendo o cliente estabelecido a conecção com sucesso, este irá comunicar com o servidor através de pedidos. Esses pedidos são "ouvidos" pelo servidor e comunicados à \nameref{ssec:func_new_msg} que os irá processar.
 
-Finalmente, como estão a ser usados sockets TCP (ACRÓNIMO), estes "sentem" se alguma exceção aconteceu e se o cliente se desconectou do servidor, caso isso aconteça, o servidor irá remover este cliente da lista de clientes, executar a \nameref{ssec:func_clean_client} e fechar o socket do cliente.
+Finalmente, como estão a ser usados sockets TCP \ac{tcp}, estes "sentem" se alguma exceção aconteceu e se o cliente se desconectou do servidor, caso isso aconteça, o servidor irá remover este cliente da lista de clientes, executar a \nameref{ssec:func_clean_client} e fechar o socket do cliente.
 
 \subsection{Função find\_client\_id}
 \label{ssec:func_find_client_id}
@@ -291,12 +291,12 @@ A função find\_client\_id aceita como parâmetros o socket do cliente e procur
 \subsection{Função encrypt\_intvalue}
 \label{ssec:func_encrypt_value_server}
 
-O objetivo desta função é encriptar um valor inteiro, para tal, aceita como parâmetros o id do cliente e um valor inteiro, devolvendo uma palavra (String) codificada que representa esse valor. De seguida, é usada a chave previamente guardada no dicionário associada ao id do cliente e criada uma cifra do tipo AES-128 (ACRONIMO). Esta crifa criada, será usada para encriptar o número em forma de bytes do tipo 'utf8'. Por final, convertemos os bytes que obtivemos no passo anterior para texto (String) usando a função \textbf{base64.b64encode} (Acrónimo).
+O objetivo desta função é encriptar um valor inteiro, para tal, aceita como parâmetros o id do cliente e um valor inteiro, devolvendo uma palavra (String) codificada que representa esse valor. De seguida, é usada a chave previamente guardada no dicionário associada ao id do cliente e criada uma cifra do tipo AES-128 \ac{aes}. Esta crifa criada, será usada para encriptar o número em forma de bytes do tipo 'utf8'. Por final, convertemos os bytes que obtivemos no passo anterior para texto (String) usando a função \textbf{base64.b64encode} \ac{base64}.
 
 \subsection{Função decrypt\_intvalue}
 \label{ssec:func_decrypt_value_server}
 
-O funcionamento desta função é próximo ao da \nameref{ssec:func_encrypt_value_server}, tendo apenas o funcionamento oposto. Para desencriptar os números, a função aceita como parâmetros o id do cliente e um texto (String). Começa por criar a chave de encriptação do tipo AES-128 (ACRONIMO) e de seguida converte o texto que recebemos em bytes usando a função \textbf{base64.b64decode} (Acrónimo). Tendo obtido o valor em bytes, procede à desencriptação usando a cifra criada anteriormente. Por fim, converte os valores bytes obtidos em uma String desencriptada, convertendo essa String para inteiro e devolvendo-a.
+O funcionamento desta função é próximo ao da \nameref{ssec:func_encrypt_value_server}, tendo apenas o funcionamento oposto. Para desencriptar os números, a função aceita como parâmetros o id do cliente e um texto (String). Começa por criar a chave de encriptação do tipo AES-128 \ac{aes} e de seguida converte o texto que recebemos em bytes usando a função \textbf{base64.b64decode} \ac{base64}. Tendo obtido o valor em bytes, procede à desencriptação usando a cifra criada anteriormente. Por fim, converte os valores bytes obtidos em uma String desencriptada, convertendo essa String para inteiro e devolvendo-a.
 
 \begin{figure}[!h]
 \center
@@ -406,14 +406,18 @@ Por fim, o servidor desvincula o client, recorrendo à \nameref{ssec:func_clean_
 
 \section{Git}
 \label{sec:git}
-As funcionalidades do git foram muito utilizados neste projeto, desde a simples sincronização de ficheiros e código, até à criação, junção e gestão de branches (\textbf{IMAGEM DE EXEMPLO})
+As funcionalidades do git foram muito utilizados neste projeto, desde a simples sincronização de ficheiros e código, até à criação, junção e gestão de branches (\textbf{\autoref{fig:git}}). 
+
+\begin{figure}[!h]
+\center 
+\includegraphics[height=220pt]{img/otherFunctions_Branch_deletion.png}
+\caption{Exemplo da eliminação de branches (eliminação branch otherFunctions)}
+\label{fig:git}
+\end{figure}
 
 \section{Code UA}
-\label{sec:git}
-As funcionalidades do Code UA forneceram bastante ajuda ao desenvolvimento projeto, desde a própria visualização dos branches disponíveis, bem como a própria gestão e visualização do código, até à criação de funcionalidades a serem desenvolvidas e bugs a serem resolvidos. Pode visualizar o projeto no Code UA, através do link: http://code.ua.pt/projects/labi2021-ap2-g29
-
-
-\section{Exemplos}
+\label{sec:code_ua}
+As funcionalidades do Code UA forneceram bastante ajuda ao desenvolvimento projeto, desde a própria visualização dos branches disponíveis, bem como a própria gestão e visualização do código, até à criação de funcionalidades a serem desenvolvidas e bugs a serem resolvidos. Pode visualizar o projeto no Code UA, através do link: \url{http://code.ua.pt/projects/labi2021-ap2-g29}
 
 
 \chapter{Resultados}
@@ -422,7 +426,113 @@ Descreve os resultados obtidos.
 
 \chapter{Análise}
 \label{chap.analise}
-Analisa os resultados.
+
+\section{Wireshark}
+\label{sec:wireshark}
+Nesta secção iremos mostrar a diferença, em termos de segurança, entre utilizar encriptação na ligação, contra não utilizar encriptação. É relevante de salientar que o jogo suporta encriptação apenas para os números trocados entre o cliente e o servidor.
+
+\subsection{Sem encriptação}
+\label{ssec:wireshark_decrypt}
+
+Na \autoref{fig:client_start} o cliente começou o servidor com o modo sem encriptação e como consequência, os seus dados não irão ser encriptados.
+
+\begin{figure}[!h]
+\center 
+\includegraphics[height=170pt]{img/non_encripted/client_start.png}
+\caption{Operação 'START' sem encriptação}
+\label{fig:client_start}
+\end{figure}
+
+A \autoref{fig:server_start} mostra-nos que o cliente escolheu conectar com o servidor em modo desencriptado e o servidor retornou-lhe o número máximo de tentativas.
+
+\begin{figure}[!h]
+\center 
+\includegraphics[height=210pt]{img/non_encripted/server_start.png}
+\caption{Operação 'START' processada pelo servidor}
+\label{fig:server_start}
+\end{figure}
+
+Estando o programa Wireshark a funcionar de acordo com a \autoref{fig:config_inicial}, é permitido ao programa captar a informação que atravessa esta porta. 
+
+\begin{figure}[!h]
+\center 
+\includegraphics[height=180pt]{img/non_encripted/config_inicial.png}
+\caption{Configuração inicial para captar os valores que atravessam a porta escolhida pelo utilizador}
+\label{fig:config_inicial}
+\end{figure}
+
+A \autoref{fig:wireshark_start_request} mostra-nos que o programa Wireshark capturou a informação relativa ao nosso pedido e pode ver todos os campos que enviarmos.
+
+\begin{figure}[!h]
+\center 
+\includegraphics[height=220pt]{img/non_encripted/wireshark_start_request.png}
+\caption{Wireshark captou o pedido do cliente desencriptado}
+\label{fig:wireshark_start_request}
+\end{figure}
+
+Na \autoref{fig:wireshark_start_response} podemos observar que o programa conseguiu captar com sucesso a resposta do servidor e pode ter acesso a toda a informação da mesma.
+
+\begin{figure}[!h]
+\center 
+\includegraphics[height=220pt]{img/non_encripted/wireshark_start_response.png}
+\caption{Wireshark captou a resposta do servidor desencriptada}
+\label{fig:wireshark_start_response}
+\end{figure}
+
+Como vimos nas imagens anteriores, o tipo de comunicação sem encriptação de dados com o servidor acarreta uma grave falha de segurança e só deve ser usado em último caso e entre redes seguras. Usando este tipo de comunicação, qualquer pessoa que esteje a correr um programa de interseção de dados, pode ter acesso a toda a informação que transmitimos, revelando-se um grande problema quando estivermos a transmitir dados sensíveis.
+
+De forma a combater esta vulnerabilidade, foi implementada a função de encriptação de dados que está explicada a seguir (\nameref{ssec:wireshark_encrypt}).
+
+\subsection{Com encriptação}
+\label{ssec:wireshark_encrypt}
+
+Na \autoref{fig:client_start_enc} o cliente começou o servidor de modo encriptado, logo os seus dados serão encriptados.
+
+\begin{figure}[!h]
+\center 
+\includegraphics[height=160pt]{img/encripted/client_start.png}
+\caption{Operação 'START' com encriptação}
+\label{fig:client_start_enc}
+\end{figure}
+
+A \autoref{fig:server_start_enc} mostra-nos que o cliente escolheu conectar com o servidor em modo encriptado e o servidor retornou-lhe o número máximo de tentativas.
+
+\begin{figure}[!h]
+\center 
+\includegraphics[height=90pt]{img/encripted/server_start.png}
+\caption{Operação 'START' processada pelo servidor}
+\label{fig:server_start_enc}
+\end{figure}
+
+Estando o programa Wireshark a funcionar de acordo com a \autoref{fig:config_inicial_enc}, é permitido ao programa captar a informação que atravessa esta porta. 
+
+\begin{figure}[!h]
+\center 
+\includegraphics[height=170pt]{img/encripted/config_inicial.png}
+\caption{Configuração inicial para captar os valores que atravessam a porta escolhida pelo utilizador}
+\label{fig:config_inicial_enc}
+\end{figure}
+
+A \autoref{fig:wireshark_start_request_enc} mostra-nos que o programa Wireshark capturou a informação relativa ao nosso pedido e pode ver todos os campos que enviarmos.
+
+\begin{figure}[!h]
+\center 
+\includegraphics[height=220pt]{img/encripted/wireshark_start_request.png}
+\caption{Wireshark captou o pedido do cliente encriptado}
+\label{fig:wireshark_start_request_enc}
+\end{figure}
+
+Na \autoref{fig:wireshark_start_response_enc} podemos observar que o programa conseguiu captar com sucesso a resposta do servidor e pode ter acesso a toda a informação da mesma, no entanto não consegue saber qual é o valor da resposta, pois esta se encontra encriptada.
+
+\begin{figure}[!h]
+\center 
+\includegraphics[height=220pt]{img/encripted/wireshark_start_response.png}
+\caption{Wireshark captou a resposta do servidor encriptada}
+\label{fig:wireshark_start_response_enc}
+\end{figure}
+
+Como vimos nas imagens anteriores, o tipo de comunicação com encriptação de dados é imensamente superior à conecção convencional sem encriptação.
+
 
 \chapter{Conclusões}
 \label{chap.conclusao}
@@ -448,6 +558,9 @@ No fim indicar a percentagem de contribuição de cada autor.
 \acro{miect}[MIECT]{Mestrado Integrado em Engenharia de Computadores e Telemática}
 \acro{lei}[LEI]{Licenciatura em Engenharia Informática}
 \acro{glisc}[GLISC]{Grey Literature International Steering Committee}
+\acro{aes}[AES]{Advanced Encryption Standard (cifra simétrica por blocos)}
+\acro{base64}[Base64]{Base64 (forma de codificar octetos arbitrários como caracteres)}
+\acro{tcp}[TCP]{Transmission Control Protocol}
 \end{acronym}
 
 
